@@ -162,11 +162,72 @@ colonne « Result »).
 ## Facultatif : l'apparence de votre site (thème)
 
 Les écrans peuvent prendre l'apparence d'un lieu (logo, couleurs, polices) avec
-un dossier de *thème*, sans changer le code : `sudo ./deploy/install.sh --theme
+un dossier de *thème*, sans changer le code : `./deploy/install.sh --theme
 /chemin/du/theme`. Voir `deploy/theme-example/`. Un thème qui utilise une marque
-officielle (par exemple le système de design de l'État) doit rester hors de ce
-dépôt. Pour la préfecture de la Moselle (système de design de l'État) :
-<https://github.com/fbmguerin/februus-theme-moselle>.
+officielle doit rester hors de ce dépôt.
+
+### Thème de la préfecture de la Moselle (système de design de l'État)
+
+> **ATTENTION : identité officielle de l'État. À lire avant d'installer.**
+>
+> Ce thème affiche le **bloc-marque « Préfet de la Moselle »**, la police
+> **Marianne** et le **système de design de l'État (DSFR)**. Ils appartiennent à
+> l'État. Leurs modalités d'utilisation (<https://github.com/GouvernementFR/dsfr>,
+> fichier `doc/legal/cgu.md`) les **réservent aux services de l'État** et
+> interdisent tout usage « susceptible de créer une confusion avec un service
+> public officiel ».
+>
+> - Ne l'installez **que** sur une station utilisée par la préfecture de la
+>   Moselle (ou un autre service de l'État qui y a droit), avec l'accord de la
+>   préfecture (le responsable du projet indique l'avoir obtenu le 5 octobre
+>   2026).
+> - Ne l'installez **pas** pour une école, une entreprise, un particulier ou un
+>   essai hors de la préfecture, et ne recopiez **pas** la marque ailleurs. La
+>   licence MIT du projet ne donne **aucun** droit dessus.
+> - **Risques.** Utiliser l'identité de l'État hors de son cadre peut exposer la
+>   personne qui le fait à des sanctions pénales : article 433-13 du code pénal
+>   (activité exercée « dans des conditions de nature à créer dans l'esprit du
+>   public une confusion avec l'exercice d'une fonction publique » : jusqu'à un
+>   an d'emprisonnement et 15 000 euros d'amende ; vérifiez le texte en
+>   vigueur), ainsi qu'aux actions que l'État se réserve le droit d'engager
+>   contre les usages trompeurs (modalités d'utilisation et `LICENSE.md` du
+>   DSFR). Ce n'est qu'un rappel, pas un avis juridique : en cas de doute,
+>   demandez au service juridique de la préfecture.
+
+En `root`, sur la station où Februus est déjà installé (étapes 1 à 5) :
+
+```
+apt-get install -y curl
+git clone https://github.com/fbmguerin/februus-theme-moselle.git /usr/local/src/februus-theme-moselle
+cd /usr/local/src/februus-theme-moselle
+./fetch-dsfr.sh
+cd /usr/local/src/februus
+./deploy/install.sh --theme /usr/local/src/februus-theme-moselle
+```
+
+`fetch-dsfr.sh` télécharge le système de design de l'État depuis le paquet npm
+officiel (vérifié avec une empreinte SHA-512 fixe : un fichier modifié est
+refusé). Sans lui, les écrans s'affichent sans le style. L'écran montre ensuite
+le bloc-marque « Préfet de la Moselle » et la police Marianne. Si vous utilisez
+le kiosque (étape 6), redémarrez.
+
+Mettre à jour le thème plus tard :
+
+```
+cd /usr/local/src/februus-theme-moselle
+git pull
+./fetch-dsfr.sh
+cd /usr/local/src/februus
+./deploy/install.sh --theme /usr/local/src/februus-theme-moselle
+```
+
+Revenir aux écrans neutres (par exemple avant de prêter le PC, ou pour un essai
+hors de la préfecture) :
+
+```
+rm -r /etc/februus/theme
+systemctl restart februus
+```
 
 ## Utilisation par un agent
 

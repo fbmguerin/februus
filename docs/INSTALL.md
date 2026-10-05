@@ -155,11 +155,70 @@ To be even cleaner, then do the checks of sections 7 and 8 of
 ## Optional: a look of your own (theme)
 
 The screens can take the look of a place (logo, colors, fonts) with a *theme*
-folder, without changing the code: `sudo ./deploy/install.sh --theme
+folder, without changing the code: `./deploy/install.sh --theme
 /path/to/the/theme`. See `deploy/theme-example/`. A theme that uses an official
-mark (for example the State design system) must stay out of this repository.
-For the Préfecture de la Moselle (State design system, French):
-<https://github.com/fbmguerin/februus-theme-moselle>.
+mark must stay out of this repository.
+
+### Theme of the Préfecture de la Moselle (State design system)
+
+> **WARNING: official identity of the State. Read before installing.**
+>
+> This theme shows the **bloc-marque "Préfet de la Moselle"**, the **Marianne**
+> font and the **State design system (DSFR)**. They belong to the State. Their
+> terms of use (<https://github.com/GouvernementFR/dsfr>, file
+> `doc/legal/cgu.md`) **reserve them to the services of the State** and forbid
+> any use "likely to create confusion with an official public service".
+>
+> - Install it **only** on a station used by the Préfecture de la Moselle (or
+>   another State service that is entitled to it), with the agreement of the
+>   préfecture (the maintainer of this project states that it was obtained,
+>   on 2026-10-05).
+> - Do **not** install it for a school, a company, a private person or a test
+>   outside the préfecture, and do **not** copy the mark elsewhere. The MIT
+>   licence of this project does **not** give any right on it.
+> - **Risks.** Using the State identity outside its framework can expose the
+>   person who does it to criminal penalties: article 433-13 of the French
+>   Penal Code (activity "in conditions likely to create confusion with the
+>   exercise of a public function": up to one year of imprisonment and a
+>   15,000 euro fine; check the current text), and to the actions that the
+>   State reserves the right to take against misleading uses (terms of use
+>   of the DSFR, `LICENSE.md` of the DSFR). This is a reminder, not legal
+>   advice: ask the legal department of the préfecture if in doubt.
+
+As `root`, on the station where Februus is already installed (steps 1 to 5):
+
+```
+apt-get install -y curl
+git clone https://github.com/fbmguerin/februus-theme-moselle.git /usr/local/src/februus-theme-moselle
+cd /usr/local/src/februus-theme-moselle
+./fetch-dsfr.sh
+cd /usr/local/src/februus
+./deploy/install.sh --theme /usr/local/src/februus-theme-moselle
+```
+
+`fetch-dsfr.sh` downloads the State design system from the official npm package
+(checked with a fixed SHA-512 fingerprint: a modified file is refused). Without
+it, the screens appear without the style. Then the screen shows the bloc-marque
+"Préfet de la Moselle" and the Marianne font. If you use the kiosk (step 6),
+reboot.
+
+Update the theme later:
+
+```
+cd /usr/local/src/februus-theme-moselle
+git pull
+./fetch-dsfr.sh
+cd /usr/local/src/februus
+./deploy/install.sh --theme /usr/local/src/februus-theme-moselle
+```
+
+Go back to the plain screens (for example before lending the PC, or for a test
+outside the préfecture):
+
+```
+rm -r /etc/februus/theme
+systemctl restart februus
+```
 
 ## Use by an agent
 
