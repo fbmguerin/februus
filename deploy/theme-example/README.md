@@ -23,6 +23,8 @@ What a theme must keep (see the comment in `templates/base.html`): the
 `content` block, the `<audio>` and the `live.js` script.
 
 This example only adds a small mark in the top bar.
-Do not put in this public repository anything that must not be reused by
-everybody (a logo, an official mark): keep such a theme in its own, private
-place.
+Do not put in this repository anything that must not be reused by everybody
+(a logo, an official mark): keep such a theme in its own repository, and do
+not redistribute what you are not allowed to (see the example of the
+Préfecture de la Moselle theme, which downloads the State design system at
+install time instead of storing it).

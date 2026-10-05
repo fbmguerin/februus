@@ -157,8 +157,9 @@ To be even cleaner, then do the checks of sections 7 and 8 of
 The screens can take the look of a place (logo, colors, fonts) with a *theme*
 folder, without changing the code: `sudo ./deploy/install.sh --theme
 /path/to/the/theme`. See `deploy/theme-example/`. A theme that uses an official
-mark (for example the State design system) must stay in its own private place,
-not in this public repository.
+mark (for example the State design system) must stay out of this repository.
+For the Préfecture de la Moselle (State design system, French):
+<https://github.com/fbmguerin/februus-theme-moselle>.
 
 ## Use by an agent
 

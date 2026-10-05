@@ -164,8 +164,9 @@ colonne « Result »).
 Les écrans peuvent prendre l'apparence d'un lieu (logo, couleurs, polices) avec
 un dossier de *thème*, sans changer le code : `sudo ./deploy/install.sh --theme
 /chemin/du/theme`. Voir `deploy/theme-example/`. Un thème qui utilise une marque
-officielle (par exemple le système de design de l'État) doit rester dans son
-propre dépôt privé, pas dans ce dépôt public.
+officielle (par exemple le système de design de l'État) doit rester hors de ce
+dépôt. Pour la préfecture de la Moselle (système de design de l'État) :
+<https://github.com/fbmguerin/februus-theme-moselle>.
 
 ## Utilisation par un agent
 

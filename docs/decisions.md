@@ -576,3 +576,13 @@ to keep STATUS short.
   guides and the tests follow. The code, the logs and the documents keep
   English as the reference. To read by the préfecture: the five tips and the
   warnings about viruses.
+- 2026-10-05 — The theme of the Préfecture de la Moselle is a PUBLIC repository
+  (user choice), `fbmguerin/februus-theme-moselle`, MIT for its own files only.
+  It does not contain the DSFR nor Marianne: `fetch-dsfr.sh` downloads the
+  official npm package `@gouvfr/dsfr` 1.15.3 at install time and refuses it if
+  its SHA-512 differs from the pinned one (the registry's). A `NOTICE` says what
+  the MIT licence does not cover (DSFR and Marianne: State, terms of use of the
+  SIG; the bloc-marque: the préfecture). The earlier private repository, which
+  held the DSFR files, was renamed `februus-theme-moselle-ancien` (private).
+  `install.sh --theme` now copies only `templates/` and `static/`. Still to do:
+  validation by the communication service of the préfecture.

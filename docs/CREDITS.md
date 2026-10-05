@@ -24,8 +24,10 @@ on 2026-10-05).
 
 The State design system (DSFR), the Marianne font and the bloc-marque of a
 préfecture are **not** in this repository: their terms of use reserve them to
-the State services. A place that is entitled to them keeps them in a private
-theme (`deploy/theme-example/` shows the structure).
+the State services. A place that is entitled to them uses a separate theme
+that downloads them at install time (for the Préfecture de la Moselle:
+<https://github.com/fbmguerin/februus-theme-moselle>); `deploy/theme-example/`
+shows the structure.
 
 EICAR (the antivirus test string) is generated at runtime, never stored.
 
