@@ -1,0 +1,69 @@
+# Februus: the station service. One process: it follows the USB keys,
+# analyzes them (the analyzers run in a child process that it kills on a
+# timeout) and shows the kiosk screens on 127.0.0.1.
+# Only starts the service and applies the hardening; every setting of
+# Februus is in /etc/februus/februus.toml.
+# Installed by deploy/install.sh. NOT checked on the test PC yet (it
+# replaces februus-scanner, februus-web and februus-analyzer).
+# FR : un seul service : surveillance des clés, analyse et écrans, sous le
+# compte februus, avec le moins de droits possible. Aucun réglage métier ici.
+
+[Unit]
+Description=Februus (USB key analysis and kiosk screens)
+Documentation=https://github.com/fbmguerin/februus
+Wants=clamav-daemon.service udisks2.service
+After=clamav-daemon.service udisks2.service systemd-udevd.service network.target
+
+[Service]
+User=februus
+Group=februus
+ExecStart=/usr/local/bin/februus serve
+Restart=always
+RestartSec=2
+# The key log (/var/log/februus) is created readable by the group februus
+# only.
+UMask=0027
+
+# --- Network: this machine only. The web UI listens on 127.0.0.1 (kiosk
+# browser). No other IP address is reachable. NOT PrivateNetwork=yes: in a
+# private network namespace the service does not receive the udev events
+# (key plugged in, removed). Unix sockets: clamd, D-Bus; netlink: udev.
+# FR : seulement cette machine ; pas de PrivateNetwork (plus d'événements
+# udev dans un espace réseau privé).
+IPAddressDeny=any
+IPAddressAllow=localhost
+RestrictAddressFamilies=AF_UNIX AF_NETLINK AF_INET AF_INET6
+
+# --- File system: NO private mount namespace. Checked on the test PC (on
+# the former scanner service): with ProtectSystem, ProtectHome, PrivateTmp,
+# ProtectProc or ProtectKernel*=yes, the service lives in its own mount
+# namespace, and clamd (confined by AppArmor) then refuses every file
+# descriptor it is given ("Not a regular file", AppArmor "disconnected
+# path"): every key would be red. The account has no right anyway: it can
+# write only in /var/log/februus (file permissions).
+# Alternative to study: send the files to clamd as a stream (INSTREAM).
+# FR : pas d'espace de montage privé, sinon clamd (AppArmor) refuse les
+# fichiers transmis et toutes les clés sont rouges.
+
+# --- Devices: only the USB disks (sd*), read-only (the udev rule gives the
+# group "februus" read access; nothing here can write to a raw disk).
+DevicePolicy=closed
+DeviceAllow=block-sd r
+
+# --- Privileges and kernel.
+NoNewPrivileges=yes
+CapabilityBoundingSet=
+AmbientCapabilities=
+ProtectClock=yes
+ProtectHostname=yes
+RestrictNamespaces=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+SystemCallFilter=~@privileged @resources
+
+[Install]
+WantedBy=multi-user.target

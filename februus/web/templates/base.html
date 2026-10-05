@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <title>Februus</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="screen-{{ screen.name }}{% if screen.color %} color-{{ screen.color }}{% endif %}" data-key="{{ key }}">
+  <header>
+    <span class="brand">Februus</span>
+  </header>
+  <main>
+    {% include "_notice.html" %}
+    {% block content %}{% endblock %}
+  </main>
+  <footer>
+    <span>Station {{ station }}</span>
+    <span>{% block status %}{% endblock %}</span>
+  </footer>
+  {% if sound %}
+    <audio src="/sounds/{{ sound[0] }}.wav" autoplay{% if sound[1] %} loop{% endif %}></audio>
+  {% endif %}
+  {% if live %}
+    <script src="/static/live.js"></script>
+  {% endif %}
+</body>
+</html>

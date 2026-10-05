@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Station blanche — affiche</title>
+<!-- Affiche A4 à imprimer et à poser à côté de la station.
+     Imprimer depuis un navigateur : A4 portrait, marges par défaut,
+     cocher « graphiques d'arrière-plan » pour garder les couleurs.
+     Les titres entre guillemets sont ceux des écrans, en français. -->
+<style>
+  @page { size: A4 portrait; margin: 12mm; }
+  :root {
+    --green: #1b7f3b;
+    --orange: #c45a00;
+    --red: #b3141c;
+    --neutral: #1f3a5f;
+    --ink: #1a1a1a;
+    --muted: #555555;
+    --line: #c8ccd2;
+    --paper: #ffffff;
+  }
+  * { box-sizing: border-box; }
+  html { background: #e9ebee; }
+  body {
+    margin: 0;
+    font-family: "DejaVu Sans", "Segoe UI", Arial, sans-serif;
+    color: var(--ink);
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .page {
+    width: 186mm;
+    min-height: 273mm;
+    margin: 12mm auto;
+    padding: 0;
+    background: var(--paper);
+    display: flex;
+    flex-direction: column;
+    gap: 4mm;
+  }
+  header {
+    background: var(--neutral);
+    color: #fff;
+    padding: 5mm 8mm;
+  }
+  header h1 { margin: 0; font-size: 26pt; line-height: 1.1; }
+  header p { margin: 2mm 0 0; font-size: 13pt; }
+  section { padding: 0 8mm; }
+  h2 {
+    font-size: 13pt;
+    margin: 0 0 2mm;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--neutral);
+  }
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4mm; }
+  .step {
+    border: 0.6mm solid var(--line);
+    border-radius: 3mm;
+    padding: 3mm;
+  }
+  .step .num {
+    display: inline-block;
+    width: 8mm; height: 8mm;
+    border-radius: 50%;
+    background: var(--neutral);
+    color: #fff;
+    font-weight: bold;
+    font-size: 13pt;
+    text-align: center;
+    line-height: 8mm;
+    margin-bottom: 1.5mm;
+  }
+  .step strong { display: block; font-size: 12.5pt; margin-bottom: 1mm; }
+  .step span { font-size: 10pt; color: var(--muted); }
+  .verdict {
+    display: grid;
+    grid-template-columns: 30mm 1fr;
+    margin-bottom: 2.5mm;
+    border-radius: 3mm;
+    overflow: hidden;
+    border: 0.6mm solid var(--line);
+  }
+  .verdict .swatch {
+    color: #fff;
+    font-weight: bold;
+    font-size: 13pt;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2mm;
+    text-align: center;
+  }
+  .verdict .swatch .mark { font-size: 20pt; line-height: 1; margin-bottom: 1mm; }
+  .verdict.green .swatch { background: var(--green); }
+  .verdict.orange .swatch { background: var(--orange); }
+  .verdict.red .swatch { background: var(--red); }
+  .verdict .text { padding: 2.5mm 4mm; }
+  .verdict .screen { font-size: 10pt; color: var(--muted); margin: 0 0 0.5mm; }
+  .verdict .todo { font-size: 12.5pt; margin: 0; font-weight: bold; }
+  .verdict .more { font-size: 10pt; margin: 1mm 0 0; }
+  ul.rules { margin: 0; padding-left: 6mm; font-size: 10pt; line-height: 1.35; }
+  ul.rules li { margin-bottom: 1mm; }
+  .contact {
+    margin-top: auto;
+    border-top: 0.6mm solid var(--line);
+    padding: 3mm 8mm 4mm;
+    font-size: 12pt;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 4mm;
+  }
+  .contact .fill {
+    flex: 1;
+    border-bottom: 0.4mm dotted var(--ink);
+    height: 7mm;
+  }
+  .contact small { color: var(--muted); white-space: nowrap; }
+  @media print {
+    html { background: none; }
+    .page { margin: 0; width: auto; min-height: 270mm; }
+  }
+  @media screen and (max-width: 720px) {
+    .page { width: auto; margin: 0; min-height: 0; }
+    .steps { grid-template-columns: 1fr; }
+    .verdict { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <h1>Station blanche USB</h1>
+    <p>Vérifiez ici chaque clé USB avant de l'utiliser sur un poste de travail.</p>
+  </header>
+
+  <section>
+    <h2>Comment faire</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="num">1</div>
+        <strong>Insérez votre clé</strong>
+        <span>L'analyse démarre automatiquement. Aucun bouton à toucher.</span>
+      </div>
+      <div class="step">
+        <div class="num">2</div>
+        <strong>Ne retirez pas la clé</strong>
+        <span>L'écran affiche le temps restant. Si c'est long, il indique
+        l'heure à laquelle revenir.</span>
+      </div>
+      <div class="step">
+        <div class="num">3</div>
+        <strong>Lisez la couleur</strong>
+        <span>L'écran devient vert, orange ou rouge. Suivez la consigne
+        ci-dessous.</span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Le résultat</h2>
+    <div class="verdict green">
+      <div class="swatch"><span class="mark">✓</span>VERT</div>
+      <div class="text">
+        <p class="screen">« Aucune menace détectée »</p>
+        <p class="todo">Vous pouvez retirer et utiliser votre clé.</p>
+      </div>
+    </div>
+    <div class="verdict orange">
+      <div class="swatch"><span class="mark">!</span>ORANGE</div>
+      <div class="text">
+        <p class="screen">« Clé vérifiée, avec des avertissements »</p>
+        <p class="todo">Vous pouvez l'utiliser, mais restez prudent.</p>
+        <p class="more">Lisez le message affiché (par exemple : plusieurs
+        partitions).</p>
+      </div>
+    </div>
+    <div class="verdict red">
+      <div class="swatch"><span class="mark">✕</span>ROUGE</div>
+      <div class="text">
+        <p class="screen">« N'utilisez pas cette clé »</p>
+        <p class="todo">Ne la branchez sur aucun poste. Apportez-la à votre
+        support informatique.</p>
+        <p class="more">Rouge aussi quand la clé n'a pas pu être entièrement
+        vérifiée (fichier protégé par un mot de passe, clé démarrable...).</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>À savoir</h2>
+    <ul class="rules">
+      <li><strong>Clé retirée avant la fin = rouge</strong> : elle n'a pas été
+        vérifiée. Insérez-la de nouveau pour relancer l'analyse.</li>
+      <li><strong>La station ne nettoie pas la clé</strong> : elle ne modifie, n'ajoute
+        et ne supprime aucun fichier sur votre clé.</li>
+      <li><strong>Un résultat vert ne remplace pas la prudence</strong> : n'ouvrez
+        pas un fichier inattendu, n'activez pas les macros d'un document.</li>
+      <li><strong>Clé trouvée par hasard</strong> : ne la branchez nulle part,
+        apportez-la à votre support informatique.</li>
+      <li><strong>Écran « Station hors service »</strong> : n'utilisez pas la
+        station et prévenez votre support informatique.</li>
+    </ul>
+  </section>
+
+  <div class="contact">
+    <strong>Support informatique :</strong>
+    <span class="fill"></span>
+    <small>Februus — station blanche libre</small>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,34 @@
+<!doctype html>
+{# Example theme: it replaces februus/web/templates/base.html.
+   Keep these things, else the live screens and the sounds stop working:
+   - the <body> with its classes and data-key (colors, reload on change);
+   - one <main> holding the notice include and the content block;
+   - the <audio> and the live.js script (as below). #}
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <title>Februus</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/theme/example.css">
+</head>
+<body class="screen-{{ screen.name }}{% if screen.color %} color-{{ screen.color }}{% endif %}" data-key="{{ key }}">
+  <header>
+    <span class="brand">Februus</span>
+    <span class="example-mark">Thème d'exemple</span>
+  </header>
+  <main>
+    {% include "_notice.html" %}
+    {% block content %}{% endblock %}
+  </main>
+  <footer>
+    <span>Station {{ station }}</span>
+    <span>{% block status %}{% endblock %}</span>
+  </footer>
+  {% if sound %}
+    <audio src="/sounds/{{ sound[0] }}.wav" autoplay{% if sound[1] %} loop{% endif %}></audio>
+  {% endif %}
+  {% if live %}
+    <script src="/static/live.js"></script>
+  {% endif %}
+</body>
+</html>

@@ -1,0 +1,42 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "februus"
+dynamic = ["version"]
+description = "Open-source USB sheep-dip station: scans USB drives and gives a green / orange / red verdict."
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.13"
+# Installed from Debian packages on the station (python3-fastapi...).
+dependencies = ["fastapi", "uvicorn", "jinja2", "pyudev"]
+
+[project.optional-dependencies]
+test = ["pytest", "httpx"]
+
+[project.scripts]
+februus = "februus.cli:main"
+
+[tool.setuptools.dynamic]
+version = { attr = "februus.__version__" }
+
+[tool.setuptools.packages.find]
+include = ["februus*"]
+
+[tool.setuptools.package-data]
+februus = [
+    "web/templates/*.html",
+    "web/static/*",
+    "web/static/fonts/*",
+    
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "--strict-markers"
+markers = [
+    "clamav: needs a running clamd (skipped when unavailable)",
+    "hardware: needs real hardware such as a USB key (skipped when unavailable)",
+]

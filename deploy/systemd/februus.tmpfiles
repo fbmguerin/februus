@@ -1,0 +1,9 @@
+# Februus: folder of the key log (systemd-tmpfiles).
+# Copy to /etc/tmpfiles.d/februus.conf (deploy/install.sh).
+#
+# Owner februus: the service writes the log. Nobody else has any access
+# (the log holds the names of the files that gave an orange or red
+# finding).
+# FR : le service écrit le journal des clés ; aucun autre compte n'y a
+# accès.
+d /var/log/februus 0750 februus februus -

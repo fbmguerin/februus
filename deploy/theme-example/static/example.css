@@ -1,0 +1,5 @@
+/* Example theme: only adds a small mark in the top bar. */
+.example-mark {
+  font-size: 0.6em;
+  opacity: 0.8;
+}

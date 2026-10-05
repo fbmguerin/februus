@@ -1,0 +1,131 @@
+/* Kiosk screens: large text, one color per verdict. */
+
+/* The name "Februus" is the only text in a decorative font, served by
+   the station itself (no Internet on a station; licence: docs/CREDITS.md).
+   Every other text uses a plain, readable font of Debian. */
+@font-face {
+  font-family: "Cinzel Decorative";
+  font-weight: bold;
+  src: url("/static/fonts/CinzelDecorative-Bold.ttf") format("truetype");
+}
+
+/* One color per screen, as "red, green, blue" (used with several
+   opacities below). The verdict colors must stay obvious. */
+:root {
+  --green: 27, 127, 59;
+  --orange: 196, 90, 0;
+  --red: 179, 20, 28;
+  --neutral: 31, 58, 95;
+  --text-light: #ffffff;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+/* Every screen: the color of the verdict as background. Layout: a top bar
+   (name) and a bottom bar (station, status) frame the texts; the three
+   share the same left and right margin. */
+body {
+  --tone: var(--neutral);
+  --margin: 5vw;
+  display: flex;
+  flex-direction: column;
+  font-family: "DejaVu Sans", "Liberation Sans", Arial, sans-serif;
+  font-size: clamp(1.25rem, 2.5vmin, 2rem);
+  line-height: 1.35;
+  color: var(--text-light);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+  background:
+    linear-gradient(to right, rgb(var(--tone)) 50%, rgba(var(--tone), 0.25)),
+    linear-gradient(to top, transparent 22vw, rgb(var(--tone)) 36.13vw),
+    rgb(var(--tone));
+}
+
+body.color-green { --tone: var(--green); }
+body.color-orange { --tone: var(--orange); }
+body.color-red { --tone: var(--red); }
+
+header, footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2.5vh var(--margin);
+}
+
+footer {
+  font-size: 0.6em;
+  opacity: 0.85;
+}
+
+/* The name of the product: the only text in Cinzel Decorative. */
+.brand {
+  font-family: "Cinzel Decorative", serif;
+  font-weight: bold;
+  font-size: 1.4em;
+  letter-spacing: 0.1em;
+}
+
+/* The texts: one column on the left, the heads stay free on the right.
+   Same space between all blocks; the title has a bit more. */
+main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1em;
+  padding: 0 var(--margin);
+  max-width: calc(var(--margin) + max(46vw, 28em));
+}
+
+main > * { margin: 0; }
+
+h1 {
+  font-size: 1.9em;
+  line-height: 1.15;
+  margin-bottom: 0.4em;
+}
+
+.warning {
+  font-weight: bold;
+  border: 3px solid var(--text-light);
+  padding: 0.6em 0.8em;
+}
+
+.progress {
+  height: 1.6em;
+  border: 3px solid var(--text-light);
+}
+
+.progress .bar {
+  height: 100%;
+  background: var(--text-light);
+}
+
+.problems { padding-left: 1.2em; }
+.problems li + li { margin-top: 0.3em; }
+.details { font-size: 0.75em; opacity: 0.85; }
+
+/* Security tip of the idle screen, set apart by a thin line. */
+.tip {
+  margin-top: 1em;
+  padding-top: 1em;
+  border-top: 2px solid rgba(255, 255, 255, 0.4);
+  font-size: 0.85em;
+}
+
+/* Long analysis: the message must be readable from far away. */
+.long-scan {
+  background: var(--text-light);
+  color: rgb(var(--tone));
+  text-shadow: none;
+  padding: 0.6em 0.9em;
+}
+.long-scan .big { font-size: 1.5em; font-weight: bold; margin: 0.2em 0; }
+
+/* Second key plugged in: shown above the usual content. */
+.notice { margin-bottom: 1em; }
+.notice p + p { margin-top: 0.3em; }

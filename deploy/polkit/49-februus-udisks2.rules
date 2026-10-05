@@ -1,0 +1,16 @@
+// Februus: only the "februus" account (the scanner) may mount and unmount
+// USB keys through udisks2, without a password. Internal disks
+// (filesystem-mount-system) stay forbidden.
+// Copy to /etc/polkit-1/rules.d/ (install.sh, T14).
+// FR : seul le compte februus peut monter et démonter les clés USB.
+polkit.addRule(function (action, subject) {
+    if (subject.user !== "februus") {
+        return polkit.Result.NOT_HANDLED;
+    }
+    if (action.id === "org.freedesktop.udisks2.filesystem-mount" ||
+        action.id === "org.freedesktop.udisks2.filesystem-mount-other-seat" ||
+        action.id === "org.freedesktop.udisks2.filesystem-unmount-others") {
+        return polkit.Result.YES;
+    }
+    return polkit.Result.NOT_HANDLED;
+});

@@ -1,0 +1,91 @@
+# Februus configuration.
+# Copy to /etc/februus/februus.toml. Local overrides (rare) go in
+# /etc/februus/conf.d/*.toml and are merged in alphabetical order.
+# Every key is required: there are no hidden defaults in the code.
+# Check with: februus config check
+
+[station]
+# Station name shown on screen.
+# Remove this key to use the system hostname (recommended).
+# Stations are named f1, f2, ... f12 (no leading zeros).
+# name = "f1"
+
+[log]
+# One line (JSON) per key analyzed, added when its session ends. Read by
+# "februus stats". It holds no file name, except the files that gave an
+# orange or red finding.
+path = "/var/log/februus/keys.jsonl"
+
+[scan]
+# Maximum time to analyze one file. Exceeded: finding "scan.timeout" (red).
+file_timeout_seconds = 120
+# Maximum time for a whole session. Exceeded: finding "scan.timeout" (red).
+session_timeout_minutes = 240
+# If the estimated time left is longer, show "Do not remove the key,
+# come back at HH:MM".
+long_scan_warning_minutes = 5
+# How often the progress (files done, ETA) is written for the screen.
+progress_update_seconds = 1
+# How often a running analysis checks that the key is still there.
+cancel_check_ms = 200
+# More files and folders than this on a key: "scan.limit_exceeded" (red).
+max_entries = 200000
+# Maximum wait for one mount or unmount of the key (udisks2).
+mount_timeout_seconds = 30
+
+[scanner]
+# Wait after a key is plugged in, so that all its partitions are known.
+settle_seconds = 2
+# The "key removed too early" screen (red, alarm) stays this long, then
+# the station goes back to the idle screen.
+removed_screen_seconds = 30
+# How often the scanner checks for USB events and pending actions.
+poll_interval_ms = 500
+
+[verdict.rules]
+# Finding code -> color (green, orange, red). The worst color wins.
+# A code missing from this table gives RED (fail-closed).
+"clamav.detected"         = "red"
+"archive.encrypted"       = "red"
+"pdf.encrypted"           = "red"
+"scan.limit_exceeded"     = "red"
+"scan.timeout"            = "red"
+"device.refused"          = "red"
+"device.bootable"         = "red"
+# Only the "active" flag of a MBR partition: some keys are sold with it.
+# To check with real keys (T15), may become "orange".
+"device.boot_flag"        = "red"
+"device.removed"          = "red"
+"filesystem.unsupported"  = "red"
+"internal.error"          = "red"
+"device.multi_partition"  = "orange"
+# P2
+"macro.benign"            = "orange"
+"macro.suspicious"        = "red"
+
+[web]
+# The web UI listens on this address only (the kiosk browser is local).
+host = "127.0.0.1"
+port = 8080
+# Development: show every screen with a simulated session at /preview/<name>.
+preview_screens = false
+# Live screen: how often the status is read, and how long one live
+# connection lasts before the browser reconnects (it does it by itself).
+poll_interval_ms = 500
+stream_seconds = 300
+# Idle screen: a new security tip every N seconds.
+tip_change_seconds = 20
+# Sounds at the result (autoplay allowed for 127.0.0.1 in the kiosk).
+sounds = true
+
+[analyzers]
+# The analyzers run on every file: "clamav" on a station, "fake" for
+# development only. At least one. Each one has its own table below.
+enabled = ["clamav"]
+
+[analyzers.clamav]
+# Socket of the ClamAV daemon (Debian default). clamd must use the
+# settings of deploy/clamav/clamd-februus.conf.
+socket = "/run/clamav/clamd.ctl"
+# Maximum wait for one clamd answer.
+timeout_seconds = 120

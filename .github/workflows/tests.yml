@@ -1,0 +1,33 @@
+# Unit tests on every push, in Debian 13 (same OS as the station).
+name: tests
+
+# Push only: pull requests come from branches of this repository, so the
+# push run already reports on them (avoids running everything twice).
+on:
+  push:
+
+jobs:
+  unit-tests:
+    runs-on: ubuntu-latest
+    container: debian:trixie
+    steps:
+      - name: Install Debian packages
+        run: |
+          apt-get update
+          DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+            ca-certificates git python3 python3-pytest python3-setuptools python3-venv \
+            python3-fastapi python3-uvicorn python3-jinja2 python3-httpx \
+            python3-pyudev
+
+      - uses: actions/checkout@v4
+
+      - name: Install februus (venv using the Debian packages)
+        run: |
+          python3 -m venv --system-site-packages /opt/venv
+          /opt/venv/bin/pip install --no-build-isolation --no-deps -e .
+
+      - name: Check the februus command
+        run: /opt/venv/bin/februus --version
+
+      - name: Run unit tests
+        run: /opt/venv/bin/python -m pytest tests/unit

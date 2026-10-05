@@ -1,0 +1,29 @@
+{
+  "policies": {
+    "WebsiteFilter": {
+      "Block": ["<all_urls>"],
+      "Exceptions": ["http://127.0.0.1/*", "http://127.0.0.1:8080/*"]
+    },
+    "DisableDeveloperTools": true,
+    "BlockAboutConfig": true,
+    "BlockAboutAddons": true,
+    "BlockAboutProfiles": true,
+    "BlockAboutSupport": true,
+    "DisablePrivateBrowsing": true,
+    "DisableProfileImport": true,
+    "DisableFirefoxAccounts": true,
+    "DisableFirefoxStudies": true,
+    "DisableTelemetry": true,
+    "DisableAppUpdate": true,
+    "DisablePocket": true,
+    "DisableFormHistory": true,
+    "PasswordManagerEnabled": false,
+    "DontCheckDefaultBrowser": true,
+    "NoDefaultBookmarks": true,
+    "OverrideFirstRunPage": "",
+    "OverridePostUpdatePage": "",
+    "PromptForDownloadLocation": false,
+    "ExtensionSettings": {"*": {"installation_mode": "blocked"}},
+    "Permissions": {"Autoplay": {"Allow": ["http://127.0.0.1:8080"], "Default": "block-audio-video"}}
+  }
+}

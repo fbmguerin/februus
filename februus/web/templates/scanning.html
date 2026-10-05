@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+  {% if come_back_at %}
+    <div class="long-scan">
+      <p class="big">Ne retirez pas la clé.</p>
+      <p class="big">Revenez à {{ come_back_at }}.</p>
+    </div>
+  {% endif %}
+  <h1>Analyse en cours</h1>
+  <div class="progress" role="progressbar" aria-valuenow="{{ screen.percent }}" aria-valuemin="0" aria-valuemax="100">
+    <div class="bar" style="width: {{ screen.percent }}%"></div>
+  </div>
+  <p>{{ screen.files_done }} sur {{ screen.files_total }} {{ "fichier vérifié" if screen.files_total < 2 else "fichiers vérifiés" }}</p>
+  <p>
+    {% if screen.eta_minutes is none %}
+      Estimation du temps restant…
+    {% elif screen.eta_minutes <= 1 %}
+      Moins d'une minute restante.
+    {% else %}
+      Environ {{ screen.eta_minutes }} minutes restantes.
+    {% endif %}
+  </p>
+  {% if not come_back_at %}
+    <p class="warning">Ne retirez pas la clé.</p>
+  {% endif %}
+{% endblock %}

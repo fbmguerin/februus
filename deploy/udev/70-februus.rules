@@ -1,0 +1,8 @@
+# Februus: the "februus" account may READ the USB disks (the inspectors
+# read their partition table and boot sectors). Never write: mode 0640.
+# Copy to /etc/udev/rules.d/ (install.sh, T14).
+# FR : le compte februus peut LIRE les clés USB (jamais écrire).
+SUBSYSTEM=="block", ENV{DEVTYPE}=="disk", ENV{ID_BUS}=="usb", GROUP="februus", MODE="0640"
+
+# Never mount anything automatically (no desktop on the station, but be sure).
+SUBSYSTEM=="block", ENV{ID_BUS}=="usb", ENV{UDISKS_AUTO}="0"

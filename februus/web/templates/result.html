@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+  {% if screen.color == "green" %}
+    <h1>Aucune menace détectée</h1>
+    <p>Vous pouvez retirer votre clé.</p>
+  {% elif screen.color == "orange" %}
+    <h1>Clé vérifiée, avec des avertissements</h1>
+  {% else %}
+    <h1>N'utilisez pas cette clé</h1>
+  {% endif %}
+  {% if screen.problems %}
+    <ul class="problems">
+      {% for problem in screen.problems %}
+        <li>
+          {% if problem.message %}
+            {{ problem.message }}
+          {% else %}
+            Problème inconnu (code {{ problem.code }}).
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+  {% if screen.color == "orange" %}
+    <p>Vous pouvez retirer votre clé. Soyez prudent avec son contenu.</p>
+  {% elif screen.color == "red" %}
+    <p>Retirez la clé et apportez-la à votre support informatique.</p>
+  {% endif %}
+  <p class="details">{{ screen.files_done }} {{ "fichier vérifié" if screen.files_done < 2 else "fichiers vérifiés" }}.</p>
+{% endblock %}

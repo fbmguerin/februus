@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+  <h1>Insérez votre clé USB</h1>
+  <p>L'analyse démarre automatiquement.</p>
+  <p class="tip">{{ tip }}</p>
+{% endblock %}
+{% block status %}
+  {% if screen.signatures %}
+    Signatures antivirus : {{ screen.signatures }}
+  {% endif %}
+{% endblock %}

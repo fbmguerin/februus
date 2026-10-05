@@ -1,0 +1,33 @@
+# Februus kiosk: one full-screen Firefox on the web UI, nothing else.
+# Tested only in a window of a desktop (docs/hardware-validation.md, section
+# 8, 2026-10-05). NOT tested at boot: screen, sounds, no way out of the
+# browser, on a PC without a desktop session.
+# Installed by "deploy/install.sh --kiosk".
+# FR : écran de la station : Firefox plein écran dans cage, sans bureau.
+# TESTÉ SEULEMENT DANS UNE FENÊTRE, PAS AU DÉMARRAGE.
+
+[Unit]
+Description=Februus kiosk (cage + Firefox)
+After=systemd-user-sessions.service februus.service
+Wants=februus.service
+Conflicts=getty@tty1.service
+After=getty@tty1.service
+
+[Service]
+User=februus-kiosk
+Group=februus-kiosk
+# A real session on the first console (needed by the Wayland compositor).
+PAMName=login
+TTYPath=/dev/tty1
+TTYReset=yes
+TTYVHangup=yes
+TTYVTDisallocate=yes
+StandardInput=tty-fail
+UtmpIdentifier=tty1
+UtmpMode=user
+ExecStart=/usr/bin/cage -- /usr/bin/firefox-esr --kiosk http://127.0.0.1:8080
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=graphical.target
