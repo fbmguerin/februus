@@ -20,40 +20,68 @@ The checks keep their numbers (2.3, 7.12...); this plan gives the order.
 |---|---|
 | PC B, screen, speaker, keyboard, mouse, network cable | the station |
 | USB stick with `debian-13.7.0-amd64-netinst.iso` (the installer) | install |
+| **Two test USB keys** (1 GB or more, 8 to 32 GB is fine), **which will be erased** | the checks (section 1) |
 | USB extension cable | real use (the PC will be hidden) |
-| The test keys of section 1 (about 12) and 10 ordinary keys of the préfecture | checks |
+| 10 ordinary keys of the préfecture (clean, **not erased**: only plugged in) | check 5.3 |
 | A phone, a second USB keyboard, the USB hub | USBGuard (5.2, 5.4, 5.5) |
-| A second PC with this repository (to prepare the keys) | section 1 |
 | The printed poster (`docs/poster/affiche-fr.html`) | acceptance with an agent |
 | A person who does not know the project | phase 8 |
 
-## 1. Prepare the test keys (on another PC, the day before)
+No second PC is needed: the test keys are prepared on PC B itself.
+
+## 1. The test keys: two are enough (load a "kit" for each test)
+
+Instead of 12 keys, **two** keys are reloaded as often as needed with
+`tools/load-test-key.sh` (after the install of the guide, the repository is in
+`/usr/local/src/februus`). It erases the key, then writes the files of a kit.
+For safety it refuses everything that is not a small removable USB disk with
+nothing mounted, and asks to type the device name again.
 
 ```
-git clone https://github.com/fbmguerin/februus.git
-cd februus
-python3 tools/make-test-files.py ~/test-files           # eicar, archives, pdf
-python3 tools/make-test-files.py ~/test-files-big --big 900   # + a 900 MB file
+cd /usr/local/src/februus
+lsblk -o NAME,SIZE,MODEL,TRAN       # find the key: /dev/sdb for example (not a partition!)
+sudo tools/load-test-key.sh /dev/sdb eicar
 ```
 
-(The antivirus of that PC may delete `eicar.com`: turn it off for the folder.)
+Then **unplug the key and plug it in again**: the station analyzes it. Wait
+for the end (the result stays on the screen) before loading another kit.
+**Key A** serves for the kits one after the other; **key B** stays for the tests
+with two keys at once and for the USBGuard tests.
 
-| Key | How to prepare it | Expected |
+| Kit | Command (`/dev/sdb` = the key) | Expected |
 |---|---|---|
-| K1 clean FAT32 | 20 or more ordinary files, with folders, plus `texte.txt` | **green** (2.2) |
-| K2 EICAR | FAT32 with `eicar.com` | **red** `clamav.detected` (2.3, 7.3) |
-| K3 EICAR in a zip | `eicar-dans-un-zip.zip` | **red** `clamav.detected` |
-| K4 encrypted | `archive-chiffree.zip` and `pdf-chiffre.pdf` | **red** `archive.encrypted`, `pdf.encrypted` |
-| K5 too nested | `zip-trop-imbrique.zip` | **red** `scan.limit_exceeded` |
-| K6 two partitions, clean | two small FAT32 partitions with a file each | **orange** `device.multi_partition` (2.4) |
-| K7 two partitions, EICAR on the second | as K6 + `eicar.com` on partition 2 | **red**, path `sdb2/...` |
-| K8 bootable | `sudo dd if=debian-13.7.0-amd64-netinst.iso of=/dev/<key> bs=4M conv=fsync` (check the name of the key!) | **red** `device.bootable`, never mounted (2.5) |
-| K9 NTFS, K10 exFAT | one clean file each | **green** |
-| K11 big file | FAT32 + `big.bin` (900 MB) | long analysis, ETA, removal test (3.2) |
-| K12 too big | FAT32 + a 1.1 GB file (`--big 1100`) | **red** `scan.limit_exceeded` |
+| clean FAT32 (26 ordinary files) | `sudo tools/load-test-key.sh /dev/sdb clean` | **green** (2.2) |
+| NTFS, exFAT | `... ntfs`, `... exfat` | **green** |
+| EICAR | `... eicar` | **red** `clamav.detected` (2.3, 7.3) |
+| EICAR in a zip | `... eicar-zip` | **red** `clamav.detected` |
+| encrypted zip and PDF | `... encrypted` | **red** `archive.encrypted`, `pdf.encrypted` |
+| too nested zip | `... nested` | **red** `scan.limit_exceeded` |
+| two clean partitions | `... two-partitions` | **orange** `device.multi_partition` (2.4) |
+| two partitions, EICAR on the second | `... two-partitions-eicar` | **red**, path `sdb2/...` |
+| 900 MB file | `... big` | long analysis, ETA, removal test (3.1, 3.2) |
+| 1.1 GB file | `... toobig` | **red** `scan.limit_exceeded` (about 12 s) |
+| real bootable ISO | `... iso /root/debian-13.7.0-amd64-netinst.iso` | **red** `device.bootable`, never mounted (2.5) |
 
-Before copying, note the `sha256sum` of the files of K1, K2 and K6 (check 2.10:
-nothing may change on a key after the station).
+For the ISO: `curl -fL -o /root/debian-13.7.0-amd64-netinst.iso
+https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/debian-13.7.0-amd64-netinst.iso`
+(or the file of the installer stick).
+
+**Check 2.10 (nothing written on the key).** The tool saves the `sha256sum` of
+the files in `/root/test-keys/<kit>.sha256`. After the station has analyzed the
+key and the result is on screen, compare (read-only):
+
+```
+mkdir -p /mnt/k && mount -o ro /dev/sdb1 /mnt/k
+(cd /mnt/k && sha256sum --quiet -c /root/test-keys/clean.sha256 && echo ALL-IDENTICAL)
+umount /mnt/k
+```
+
+Expected: `ALL-IDENTICAL` (any difference is listed instead).
+
+**Good to know.** A key that once held an ISO and was only reformatted stays
+**red** (`device.bootable`): the boot record of the ISO remains in the empty
+space before the first partition. The tool erases the first 16 MiB for that
+reason; a quick format does not.
 
 ## 2. The phases
 
@@ -61,12 +89,12 @@ nothing may change on a key after the station).
 |---|---|---|---|---|
 | 1 | Install Debian | [INSTALL.md](INSTALL.md) steps 1-2 (no desktop; note anything unclear) | — | 30 min |
 | 2 | Install Februus | steps 3-5, with `--name f<N> --usbguard`, only keyboard and mouse plugged. **Note the minutes of each step** (freshclam wait!) | 6.1-6.3, 7.1, 7.2, 7.11 | 40 min |
-| 3 | Keys | K1 to K12 one by one: see the screen, the `februus stats`, `mountinfo` after each | 2.1-2.10, 7.3, 7.4, 7.9, 7.10, 5.3 (the 10 ordinary keys) | 60 min |
+| 3 | Keys | the kits of section 1, one by one on key A: see the screen, `februus stats`, `mountinfo` after each; check 2.10 with the saved hashes | 2.1-2.10, 7.3, 7.4, 7.9, 7.10, 5.3 (the 10 ordinary keys) | 60 min |
 | 4 | Blocked devices | phone, second keyboard, hub: the notice appears, the key behind the hub is not seen. Two keys at once (3.6, 3.7) | 5.1, 5.2, 5.4, 5.5, 3.6, 3.7 | 20 min |
-| 5 | Robustness | key removed during the analysis (K11: 3.1, 3.2), reinsert at once (3.5), `kill -9` (7.7), timeout (7.5), `systemctl stop` (7.8), **power cut during an analysis** (pull the plug, boot again: the service starts, the key still in is analyzed again, no filesystem error), network cable pulled (the station keeps working) | 2.9, 3.x, 7.5-7.8 | 45 min |
+| 5 | Robustness | key removed during the analysis (kit `big`: 3.1, 3.2), reinsert at once (3.5), `kill -9` (7.7), timeout (7.5), `systemctl stop` (7.8), **power cut during an analysis** (pull the plug, boot again: the service starts, the key still in is analyzed again, no filesystem error), network cable pulled (the station keeps working) | 2.9, 3.x, 7.5-7.8 | 45 min |
 | 6 | Kiosk | guide step 6, reboot. Screen at boot, sounds (green, orange, red, alarm) heard by a person, keyboard shortcuts (Ctrl+L, Ctrl+T, F11, Ctrl+Alt+F3) give no way out | 7.12, 8.1-8.7 | 40 min |
 | 7 | Theme | guide "Theme of the Préfecture de la Moselle" (**read the warning**), then check every screen with the keys of phase 3 (idle, analysis, green, orange, red, removed, two keys, blocked device) | — | 25 min |
-| 8 | Acceptance with an agent | a person who does not know the project, only the poster, no help: K1 (green), K2 (red), then removes K11 during the analysis. Note hesitations and wrong guesses | T15 | 20 min |
+| 8 | Acceptance with an agent | a person who does not know the project, only the poster, no help: the kits `clean` (green), `eicar` (red), then removes the key during the analysis of the kit `big`. Note hesitations and wrong guesses | T15 | 20 min |
 | 9 | Wrap-up | `sudo tools/station-report.sh` after the phases; write the results; commit the corrections of the guide | — | 20 min |
 
 Run `sudo tools/station-report.sh > /root/report-phase<N>.txt` at the end of

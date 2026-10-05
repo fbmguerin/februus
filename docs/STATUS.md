@@ -70,8 +70,8 @@ checked (`docs/CREDITS.md`). Before making the repository public, decide:
 the name and e-mail of the
 commit author in the history, the mentions of the préfecture / SIDSIC in
 AGENTS, PLAN and STATUS. Test B (second mini PC): plan in `docs/TEST-PC-B.md`
-(FR: `TEST-PC-B.fr.md`), tools `tools/make-test-files.py` and
-`tools/station-report.sh`.
+(FR: `TEST-PC-B.fr.md`), tools `tools/load-test-key.sh` (two
+test keys are enough), `tools/make-test-files.py`, `tools/station-report.sh`.
 
 Theme (2026-10-05): the screens take an optional theme
 (`install.sh --theme`, `deploy/theme-example/`); the DSFR / Préfet de la
@@ -97,6 +97,12 @@ T14b, the analyzer account, were removed in steps 2 and 3).
 - [~] T16 README, poster, demo (`docs/demo.md`): install section waits for T14
 
 ## Known issues
+
+- A key that once held an ISO and was only reformatted stays RED
+  (`device.bootable`): the El Torito record stays in the empty space before the
+  first partition (seen on 2026-10-05). Fail-closed, kept; `tools/load-test-key.sh`
+  erases the first 16 MiB. To decide: accept (agents' old installer keys must be
+  wiped), or ignore the record when a partition table covers the key.
 
 - ETA uses bytes: with thousands of small files it shows 0 while minutes
   are left (about 17 ms per file on FAT32).

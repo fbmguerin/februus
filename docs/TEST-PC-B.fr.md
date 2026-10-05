@@ -25,40 +25,69 @@ l'ordre.
 |---|---|
 | PC B, écran, haut-parleur, clavier, souris, câble réseau | la station |
 | Clé USB avec `debian-13.7.0-amd64-netinst.iso` (l'installateur) | installation |
+| **Deux clés USB de test** (1 Go ou plus, 8 à 32 Go convient), **qui seront effacées** | les contrôles (section 1) |
 | Rallonge USB | usage réel (le PC sera caché) |
-| Les clés de test de la section 1 (environ 12) et 10 clés ordinaires de la préfecture | contrôles |
+| 10 clés ordinaires de la préfecture (saines, **non effacées** : seulement branchées) | contrôle 5.3 |
 | Un téléphone, un second clavier USB, le hub USB | USBGuard (5.2, 5.4, 5.5) |
-| Un second PC avec ce dépôt (pour préparer les clés) | section 1 |
 | L'affiche imprimée (`docs/poster/affiche-fr.html`) | recette avec un agent |
 | Une personne qui ne connaît pas le projet | phase 8 |
 
-## 1. Préparer les clés de test (sur un autre PC, la veille)
+Aucun second PC n'est nécessaire : les clés de test se préparent sur le PC B
+lui-même.
+
+## 1. Les clés de test : deux suffisent (on charge un « kit » pour chaque test)
+
+Au lieu de 12 clés, **deux** clés sont rechargées autant de fois qu'il faut avec
+`tools/load-test-key.sh` (après l'installation du guide, le dépôt est dans
+`/usr/local/src/februus`). L'outil efface la clé, puis y écrit les fichiers d'un
+kit. Par sécurité, il refuse tout ce qui n'est pas une petite clé USB amovible
+sans rien de monté, et demande de retaper le nom du périphérique.
 
 ```
-git clone https://github.com/fbmguerin/februus.git
-cd februus
-python3 tools/make-test-files.py ~/test-files                  # eicar, archives, pdf
-python3 tools/make-test-files.py ~/test-files-big --big 900    # + un fichier de 900 Mo
+cd /usr/local/src/februus
+lsblk -o NAME,SIZE,MODEL,TRAN       # repérer la clé : /dev/sdb par exemple (pas une partition !)
+sudo tools/load-test-key.sh /dev/sdb eicar
 ```
 
-(L'antivirus de ce PC peut supprimer `eicar.com` : désactivez-le pour ce dossier.)
+Puis **débranchez la clé et rebranchez-la** : la station l'analyse. Attendez la
+fin (le résultat reste à l'écran) avant de charger un autre kit. La **clé A**
+sert aux kits l'un après l'autre ; la **clé B** reste pour les tests à deux clés
+et ceux d'USBGuard.
 
-| Clé | Comment la préparer | Attendu |
+| Kit | Commande (`/dev/sdb` = la clé) | Attendu |
 |---|---|---|
-| K1 saine FAT32 | 20 fichiers ordinaires ou plus, avec des dossiers, plus `texte.txt` | **vert** (2.2) |
-| K2 EICAR | FAT32 avec `eicar.com` | **rouge** `clamav.detected` (2.3, 7.3) |
-| K3 EICAR dans un zip | `eicar-dans-un-zip.zip` | **rouge** `clamav.detected` |
-| K4 chiffrée | `archive-chiffree.zip` et `pdf-chiffre.pdf` | **rouge** `archive.encrypted`, `pdf.encrypted` |
-| K5 trop imbriquée | `zip-trop-imbrique.zip` | **rouge** `scan.limit_exceeded` |
-| K6 deux partitions, saines | deux petites partitions FAT32 avec un fichier chacune | **orange** `device.multi_partition` (2.4) |
-| K7 deux partitions, EICAR sur la seconde | comme K6 + `eicar.com` sur la partition 2 | **rouge**, chemin `sdb2/...` |
-| K8 amorçable | `sudo dd if=debian-13.7.0-amd64-netinst.iso of=/dev/<cle> bs=4M conv=fsync` (vérifiez le nom de la clé !) | **rouge** `device.bootable`, jamais montée (2.5) |
-| K9 NTFS, K10 exFAT | un fichier sain chacune | **vert** |
-| K11 gros fichier | FAT32 + `big.bin` (900 Mo) | analyse longue, temps restant, test de retrait (3.2) |
-| K12 trop gros | FAT32 + un fichier de 1,1 Go (`--big 1100`) | **rouge** `scan.limit_exceeded` |
+| saine FAT32 (26 fichiers ordinaires) | `sudo tools/load-test-key.sh /dev/sdb clean` | **vert** (2.2) |
+| NTFS, exFAT | `... ntfs`, `... exfat` | **vert** |
+| EICAR | `... eicar` | **rouge** `clamav.detected` (2.3, 7.3) |
+| EICAR dans un zip | `... eicar-zip` | **rouge** `clamav.detected` |
+| zip et PDF chiffrés | `... encrypted` | **rouge** `archive.encrypted`, `pdf.encrypted` |
+| zip trop imbriqué | `... nested` | **rouge** `scan.limit_exceeded` |
+| deux partitions saines | `... two-partitions` | **orange** `device.multi_partition` (2.4) |
+| deux partitions, EICAR sur la seconde | `... two-partitions-eicar` | **rouge**, chemin `sdb2/...` |
+| fichier de 900 Mo | `... big` | analyse longue, temps restant, test de retrait (3.1, 3.2) |
+| fichier de 1,1 Go | `... toobig` | **rouge** `scan.limit_exceeded` (environ 12 s) |
+| vraie ISO amorçable | `... iso /root/debian-13.7.0-amd64-netinst.iso` | **rouge** `device.bootable`, jamais montée (2.5) |
 
-Avant de copier, notez le `sha256sum` des fichiers de K1, K2 et K6 (contrôle
-2.10 : rien ne doit changer sur une clé après la station).
+Pour l'ISO : `curl -fL -o /root/debian-13.7.0-amd64-netinst.iso
+https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/debian-13.7.0-amd64-netinst.iso`
+(ou le fichier de la clé d'installation).
+
+**Contrôle 2.10 (rien d'écrit sur la clé).** L'outil enregistre le `sha256sum`
+des fichiers dans `/root/test-keys/<kit>.sha256`. Une fois la clé analysée par la
+station et le résultat affiché, comparez (en lecture seule) :
+
+```
+mkdir -p /mnt/k && mount -o ro /dev/sdb1 /mnt/k
+(cd /mnt/k && sha256sum --quiet -c /root/test-keys/clean.sha256 && echo TOUT-IDENTIQUE)
+umount /mnt/k
+```
+
+Attendu : `TOUT-IDENTIQUE` (toute différence est listée à la place).
+
+**À savoir.** Une clé qui a contenu une ISO et qui a seulement été reformatée
+reste **rouge** (`device.bootable`) : l'enregistrement de démarrage de l'ISO
+reste dans l'espace vide avant la première partition. L'outil efface les 16
+premiers Mo pour cette raison ; un formatage rapide ne le fait pas.
 
 ## 2. Les phases
 
@@ -66,12 +95,12 @@ Avant de copier, notez le `sha256sum` des fichiers de K1, K2 et K6 (contrôle
 |---|---|---|---|---|
 | 1 | Installer Debian | [INSTALL.fr.md](INSTALL.fr.md) étapes 1-2 (sans bureau ; noter tout ce qui est flou) | — | 30 min |
 | 2 | Installer Februus | étapes 3-5, avec `--name f<N> --usbguard`, seuls clavier et souris branchés. **Noter les minutes de chaque étape** (l'attente de freshclam !) | 6.1-6.3, 7.1, 7.2, 7.11 | 40 min |
-| 3 | Clés | K1 à K12 une par une : voir l'écran, `februus stats`, `mountinfo` après chaque clé | 2.1-2.10, 7.3, 7.4, 7.9, 7.10, 5.3 (les 10 clés ordinaires) | 60 min |
+| 3 | Clés | les kits de la section 1, un par un sur la clé A : voir l'écran, `februus stats`, `mountinfo` après chacun ; contrôle 2.10 avec les empreintes enregistrées | 2.1-2.10, 7.3, 7.4, 7.9, 7.10, 5.3 (les 10 clés ordinaires) | 60 min |
 | 4 | Appareils bloqués | téléphone, second clavier, hub : le message s'affiche, la clé derrière le hub n'est pas vue. Deux clés à la fois (3.6, 3.7) | 5.1, 5.2, 5.4, 5.5, 3.6, 3.7 | 20 min |
-| 5 | Robustesse | clé retirée pendant l'analyse (K11 : 3.1, 3.2), réinsertion immédiate (3.5), `kill -9` (7.7), délai dépassé (7.5), `systemctl stop` (7.8), **coupure de courant pendant une analyse** (débrancher le PC, redémarrer : le service démarre, la clé encore branchée est réanalysée, aucune erreur de système de fichiers), câble réseau débranché (la station continue de marcher) | 2.9, 3.x, 7.5-7.8 | 45 min |
+| 5 | Robustesse | clé retirée pendant l'analyse (kit `big` : 3.1, 3.2), réinsertion immédiate (3.5), `kill -9` (7.7), délai dépassé (7.5), `systemctl stop` (7.8), **coupure de courant pendant une analyse** (débrancher le PC, redémarrer : le service démarre, la clé encore branchée est réanalysée, aucune erreur de système de fichiers), câble réseau débranché (la station continue de marcher) | 2.9, 3.x, 7.5-7.8 | 45 min |
 | 6 | Kiosque | étape 6 du guide, redémarrage. Écran au démarrage, sons (vert, orange, rouge, alarme) entendus par une personne, raccourcis clavier (Ctrl+L, Ctrl+T, F11, Ctrl+Alt+F3) sans moyen de sortir | 7.12, 8.1-8.7 | 40 min |
 | 7 | Thème | « Thème de la préfecture de la Moselle » du guide (**lire l'avertissement**), puis vérifier tous les écrans avec les clés de la phase 3 (attente, analyse, vert, orange, rouge, clé retirée, deux clés, appareil bloqué) | — | 25 min |
-| 8 | Recette avec un agent | une personne qui ne connaît pas le projet, avec la seule affiche, sans aide : K1 (vert), K2 (rouge), puis elle retire K11 pendant l'analyse. Noter les hésitations et les fausses interprétations | T15 | 20 min |
+| 8 | Recette avec un agent | une personne qui ne connaît pas le projet, avec la seule affiche, sans aide : les kits `clean` (vert), `eicar` (rouge), puis elle retire la clé pendant l'analyse du kit `big`. Noter les hésitations et les fausses interprétations | T15 | 20 min |
 | 9 | Clôture | `sudo tools/station-report.sh` après les phases ; écrire les résultats ; commiter les corrections du guide | — | 20 min |
 
 Lancez `sudo tools/station-report.sh > /root/rapport-phase<N>.txt` à la fin de

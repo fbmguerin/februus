@@ -586,3 +586,15 @@ to keep STATUS short.
   held the DSFR files, was renamed `februus-theme-moselle-ancien` (private).
   `install.sh --theme` now copies only `templates/` and `static/`. Still to do:
   validation by the communication service of the préfecture.
+- 2026-10-05 — Acceptance test with TWO keys (user: 12 keys are not possible).
+  `tools/load-test-key.sh /dev/sdX <kit>` erases a test key and loads a kit
+  (clean, ntfs, exfat, eicar, eicar-zip, encrypted, nested, two-partitions,
+  two-partitions-eicar, big 900 MB, toobig 1.1 GB, iso). Safety: only a whole
+  removable USB disk of 64 GB at most, nothing mounted, the device name typed
+  again; it saves the `sha256sum` of the files (check 2.10) and erases the first
+  16 MiB. Tried on a real key: red, orange, green, ISO red, ntfs/exfat green,
+  1.1 GB red `scan.limit_exceeded`. Finding: a key once written with an ISO and
+  only reformatted stays red (leftover El Torito record before the first
+  partition); the inspector is NOT changed (fail-closed, a security rule), the
+  question is in STATUS (known issues). `docs/TEST-PC-B.md` (EN/FR) rewritten
+  around the two keys.
