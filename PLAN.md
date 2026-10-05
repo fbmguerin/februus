@@ -3,7 +3,7 @@
 > Februus : dieu romain de la purification. Station blanche libre :
 > analyse des clés USB, verdict vert / orange / rouge.
 
-Version 0.2 — 4 octobre 2026. Explication simple : `docs/HOW-IT-WORKS.md`.
+Version 0.3 — 5 octobre 2026. Explication simple : `docs/HOW-IT-WORKS.md`.
 Avancement : `docs/STATUS.md`. Décisions : `docs/decisions.md`.
 
 ## 1. Objectif et principes
@@ -30,7 +30,8 @@ clé », alerte de retrait, statistiques locales, USBGuard.
 - P2 : macros VBA / LibreOffice, YARA, signatures supplémentaires, ext4.
 - P3 : mails, syslog, Zabbix, paquet `.deb`, miroirs, déploiement de la
   config (Ansible), signal de vie.
-- P4 : validation RSSI, PG-076, RGPD, licence, dépôt public. Fichier
+- P4 : validation RSSI, PG-076, RGPD. (Licence MIT et dépôt public : faits
+  le 5 octobre 2026.) Fichier
   témoin signé si le besoin revient (il a été retiré, voir D16).
 
 **Jamais** : nettoyer les fichiers, copier vers une autre clé, envoyer des
