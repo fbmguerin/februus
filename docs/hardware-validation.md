@@ -119,38 +119,11 @@ no console 1, no desktop-free PC).
 | 8.6 | Keyboard shortcuts (Ctrl+L, Ctrl+T, F11, Ctrl+Alt+F3...) | No way to open another page or a shell | Not done (needs a human at the keyboard, in the real kiosk) |
 | 8.7 | polkit: no desktop session means no user allowed to mount keys | Only `februus` mounts keys | Not done (needs test B) |
 
-## 9. Second mini PC (test B): order of the work
+## 9. Second mini PC (test B)
 
-Goal: the real station, with no desktop session. Everything is done by
-following [INSTALL.md](INSTALL.md) as a beginner would, and the guide is
-corrected where it fails. Write the results in the tables above (add the
-date and "PC B" in the Result column).
-
-Before (on another PC): the ISO `debian-13.7.0-amd64-netinst.iso` on a USB
-stick (the installer), and the test keys:
-
-| Key | Content | Used for |
-|---|---|---|
-| clean | a few ordinary files, FAT32 | green (2.2), 7.4 |
-| EICAR | `eicar.com` (`INSTALL.md`, step 5) | red (2.3, 7.3) |
-| two partitions | two small FAT32 partitions | orange (2.4) |
-| ISO | the Debian netinst ISO written with `dd` on the whole key | red `device.bootable`, a real ISO (2.5) |
-| encrypted | an encrypted zip and PDF (`tests/samples.py`) | 7.x |
-
-Order:
-
-1. Install Debian and Februus with the guide (note every step that is unclear
-   or fails: the guide is part of the test). Steps 1 to 5 of the guide.
-2. Checks without the screen: 2.x (keys), 3.x (removal, second key), 5.x
-   (USBGuard, hub, blocked device), 6.x (installation, `--name`), 7.x.
-3. Kiosk (guide step 6) and reboot: 7.12, then the whole section 8 (screen at
-   boot, sounds, shortcuts such as Ctrl+L / Ctrl+T / F11 / Ctrl+Alt+F3, the
-   user cannot leave the browser), and 8.7 (only `februus` mounts keys).
-4. Commit the results and the corrections of the guide.
-
-Remote work (optional): with the SSH server of the installation, commands can
-be run from another PC (`ssh admin@<address>`, then `su -`), which keeps the
-kiosk screen untouched.
+The plan (keys to prepare, phases, order, go / no-go criteria, friction log of
+the install guide) is in [TEST-PC-B.md](TEST-PC-B.md) ([en français](TEST-PC-B.fr.md)).
+Results are written in the tables above, as `PC B 2026-10-xx: ...`.
 
 ## Results of 2026-10-02 (test PC)
 

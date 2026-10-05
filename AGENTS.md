@@ -101,3 +101,6 @@ Read first: `docs/STATUS.md` (short). Then only what the task needs:
 - `sudo deploy/install.sh [--name f3] [--no-apt] [--usbguard] [--kiosk]` —
   install or update a station; logs: `journalctl -u februus`
 - `februus stats [--days N]` — statistics from the key log
+- `tools/make-test-files.py <folder> [--big MB]` — test files for the keys
+  (EICAR, encrypted archives...); `sudo tools/station-report.sh` — read-only
+  report of the state of a station (acceptance test: `docs/TEST-PC-B.md`)

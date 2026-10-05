@@ -69,8 +69,9 @@ Public release prepared (2026-10-05): MIT licence (`LICENSE`), components
 checked (`docs/CREDITS.md`). Before making the repository public, decide:
 the name and e-mail of the
 commit author in the history, the mentions of the préfecture / SIDSIC in
-AGENTS, PLAN and STATUS. Test B (second mini PC): `docs/hardware-validation.md`
-section 9.
+AGENTS, PLAN and STATUS. Test B (second mini PC): plan in `docs/TEST-PC-B.md`
+(FR: `TEST-PC-B.fr.md`), tools `tools/make-test-files.py` and
+`tools/station-report.sh`.
 
 Theme (2026-10-05): the screens take an optional theme
 (`install.sh --theme`, `deploy/theme-example/`); the DSFR / Préfet de la
