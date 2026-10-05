@@ -128,8 +128,12 @@ fi
 if [ -n "$THEME" ]; then
   step "4b. Theme"
   # Owned by root, read-only for the service.
+  # Only templates/ and static/ are copied (not .git, README, scripts...).
   rm -rf /etc/februus/theme.new
-  cp -r "$THEME" /etc/februus/theme.new
+  install -d /etc/februus/theme.new
+  for part in templates static; do
+    if [ -d "$THEME/$part" ]; then cp -r "$THEME/$part" /etc/februus/theme.new/; fi
+  done
   chown -R root:root /etc/februus/theme.new
   chmod -R u=rwX,go=rX /etc/februus/theme.new
   rm -rf /etc/februus/theme

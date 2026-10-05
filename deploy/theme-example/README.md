@@ -14,8 +14,8 @@ Install it (as `root`, from the repository):
 sudo deploy/install.sh --theme /path/to/the/theme-folder
 ```
 
-The folder is copied to `/etc/februus/theme` (owned by `root`, read-only for
-the service) and the service is restarted. To go back to the plain screens:
+Only its `templates/` and `static/` folders are copied to `/etc/februus/theme`
+(owned by `root`, read-only for the service) and the service is restarted. To go back to the plain screens:
 `sudo rm -r /etc/februus/theme && sudo systemctl restart februus`.
 
 What a theme must keep (see the comment in `templates/base.html`): the
