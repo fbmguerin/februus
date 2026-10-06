@@ -618,3 +618,11 @@ to keep STATUS short.
   Without it an administrator at the station was locked in the kiosk. The
   console asks for a login and password, like SSH; the agents do not have
   one. Documented in `docs/INSTALL.md` (troubleshooting).
+- 2026-10-06 — A station never sleeps and its screen never goes blank (first
+  try: the console went blank after a few minutes). `install.sh` always (not
+  only with `--kiosk`) masks `sleep`, `suspend`, `hibernate` and
+  `hybrid-sleep.target`, and writes `/etc/default/grub.d/februus.cfg`
+  (`consoleblank=0` added to `GRUB_CMDLINE_LINUX_DEFAULT`) then runs
+  `update-grub`: `/etc/default/grub` itself is left as Debian wrote it, so a
+  Debian update never conflicts with it. Fixed values (no TOML setting): a
+  station that sleeps is never wanted.

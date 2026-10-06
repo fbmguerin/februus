@@ -274,6 +274,8 @@ corriger (comparez avec `config/februus.example.toml`).
   la machine) ;
 - le journal des clés `/var/log/februus/keys.jsonl` (une ligne par clé) ;
 - les règles USB (USBGuard), udev, udisks2 et polkit ;
+- pas de mise en veille : les cibles de veille sont masquées, et
+  `consoleblank=0` (`/etc/default/grub.d/februus.cfg`) garde l'écran allumé ;
 - avec `--kiosk` : le service `februus-kiosk` et les règles de Firefox qui
   n'autorisent que l'écran de la station.
 

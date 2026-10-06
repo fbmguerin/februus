@@ -265,6 +265,8 @@ with `config/februus.example.toml`).
   to the machine);
 - the key log `/var/log/februus/keys.jsonl` (one line per key);
 - the USB rules (USBGuard), udev, udisks2 and polkit;
+- no sleep: the sleep targets are masked, and `consoleblank=0`
+  (`/etc/default/grub.d/februus.cfg`) keeps the screen on;
 - with `--kiosk`: the service `februus-kiosk` and the Firefox rules that only
   allow the station screen.
 

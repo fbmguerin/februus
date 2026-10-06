@@ -165,6 +165,24 @@ step "7. Key log folder"
 install -m 644 "$REPO/deploy/systemd/februus.tmpfiles" /etc/tmpfiles.d/februus.conf
 systemd-tmpfiles --create /etc/tmpfiles.d/februus.conf
 
+step "7b. Never sleep, screen always on"
+# A station waits for keys all day: no suspend, and the text console (what
+# the screen shows when the kiosk is not running) never goes blank. A file
+# in grub.d, so /etc/default/grub stays as Debian wrote it.
+# FR : jamais de mise en veille ; la console ne s'éteint jamais.
+systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
+install -d -m 755 /etc/default/grub.d
+cat > /etc/default/grub.d/februus.cfg <<'GRUB'
+# Written by Februus (deploy/install.sh): the console never goes blank.
+GRUB_CMDLINE_LINUX_DEFAULT="$GRUB_CMDLINE_LINUX_DEFAULT consoleblank=0"
+GRUB
+if command -v update-grub >/dev/null; then
+  update-grub
+  echo "consoleblank=0 is active after the next reboot"
+else
+  echo "update-grub not found: add consoleblank=0 to the kernel command line by hand" >&2
+fi
+
 if [ "$USBGUARD" = yes ]; then
   step "8. USBGuard rules"
   # Station devices = what is plugged in now, without the storage devices
