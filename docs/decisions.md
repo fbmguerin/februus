@@ -632,3 +632,14 @@ to keep STATUS short.
   present), and every guide says "as root (`su -`)". `.devcontainer/` keeps
   sudo (another environment). Old results in `docs/hardware-validation.md`
   keep the commands that were really typed.
+- 2026-10-06 — Kiosk messages go to the journal (`StandardOutput=journal`,
+  `StandardError=journal`): before, cage and Firefox wrote on console 1, so
+  their errors stayed on the screen of the agents and were missing from
+  `journalctl -u februus-kiosk` (the messages of `wait-for-gpu.sh` too).
+- 2026-10-06 — Sounds at full volume (user, f1: no sound heard). On a minimal
+  Debian the ALSA mixer starts muted and nothing restores it. `install.sh
+  --kiosk` adds `alsa-utils`, sets every mixer control of the sound card to
+  100 % and unmuted, and saves it (`alsactl store`; `alsa-restore.service`
+  restores it at boot). Fixed value, not a TOML setting: deploy, not Februus.
+  The default output is the analog one (internal speaker or jack); sound
+  through the DisplayPort/HDMI screen is not set up.

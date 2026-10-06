@@ -60,3 +60,4 @@ def test_kiosk_unit_allows_console_switch_and_never_gives_up():
     assert "/usr/bin/cage -s -- " in text
     assert "ExecStartPre=/usr/local/lib/februus/wait-for-gpu.sh" in text
     assert "StartLimitIntervalSec=0" in text
+    assert "StandardError=journal" in text

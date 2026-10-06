@@ -25,6 +25,11 @@ TTYReset=yes
 TTYVHangup=yes
 TTYVTDisallocate=yes
 StandardInput=tty-fail
+# Messages of cage, Firefox and wait-for-gpu.sh go to the journal
+# (journalctl -u februus-kiosk), not on the screen of the agents.
+# FR : les messages vont dans le journal, pas sur l'écran.
+StandardOutput=journal
+StandardError=journal
 UtmpIdentifier=tty1
 UtmpMode=user
 # At boot the real graphics driver replaces the generic one (simpledrm) a

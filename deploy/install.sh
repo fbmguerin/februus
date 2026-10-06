@@ -70,7 +70,7 @@ fi
 step "1. Debian packages"
 PACKAGES="python3 python3-fastapi python3-uvicorn python3-jinja2
   python3-pyudev clamav-daemon clamav-freshclam udisks2 polkitd usbguard"
-[ "$KIOSK" = yes ] && PACKAGES="$PACKAGES cage firefox-esr"
+[ "$KIOSK" = yes ] && PACKAGES="$PACKAGES cage firefox-esr alsa-utils"
 if [ "$APT" = yes ]; then
   # shellcheck disable=SC2086
   DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends $PACKAGES
@@ -250,6 +250,19 @@ if [ "$KIOSK" = yes ]; then
   install -m 644 "$REPO/deploy/kiosk/februus-kiosk.service" /etc/systemd/system/februus-kiosk.service
   systemctl daemon-reload
   systemctl enable februus-kiosk.service
+  # Sounds of the screens: the sound card starts muted on a minimal Debian.
+  # Every output at full volume, saved (alsa-utils restores it at boot).
+  # FR : la carte son démarre muette : tout au maximum, réglage conservé.
+  if command -v amixer >/dev/null && [ -e /proc/asound/cards ] \
+      && ! grep -q 'no soundcards' /proc/asound/cards; then
+    amixer scontrols | sed -n "s/^Simple mixer control '\([^']*\)',.*/\1/p" |
+      while IFS= read -r control; do
+        amixer -q sset "$control" 100% unmute 2>/dev/null || true
+      done
+    alsactl store && echo "sound: every output at full volume"
+  else
+    echo "no sound card found: the screens will be silent"
+  fi
   echo "kiosk installed; it starts at the next boot (graphical target)"
 fi
 
