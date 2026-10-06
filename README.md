@@ -164,6 +164,7 @@ and validated at startup: `februus config check`. Annotated example:
 | [docs/STATUS.md](docs/STATUS.md) | Progress, decisions, open questions |
 | [PLAN.md](PLAN.md) | Project plan and architecture (French) |
 | [docs/hardware-validation.md](docs/hardware-validation.md) | Checks to pass on the real station |
+| [docs/DEV-STATION.md](docs/DEV-STATION.md) | Prepare a development and test PC (never a production station) |
 | [docs/poster/](docs/poster/) | Poster for the users, to print next to the station |
 | [docs/demo.md](docs/demo.md) | Demonstration script (French) |
 

@@ -177,6 +177,7 @@ obligatoire et validée au démarrage : `februus config check`. Exemple comment�
 | [docs/STATUS.md](docs/STATUS.md) | Avancement, décisions, questions ouvertes (en anglais) |
 | [PLAN.md](PLAN.md) | Plan du projet et architecture (en français) |
 | [docs/hardware-validation.md](docs/hardware-validation.md) | Contrôles à passer sur la vraie station (en anglais) |
+| [docs/DEV-STATION.md](docs/DEV-STATION.md) | Préparer un PC de développement et de test, jamais une station de production (en anglais, résumé en français) |
 | [docs/poster/](docs/poster/) | Affiche pour les utilisateurs, à imprimer à côté de la station |
 | [docs/demo.md](docs/demo.md) | Script de démonstration (en français) |
 
