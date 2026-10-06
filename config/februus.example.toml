@@ -73,6 +73,11 @@ preview_screens = false
 # connection lasts before the browser reconnects (it does it by itself).
 poll_interval_ms = 500
 stream_seconds = 300
+# Live screen watchdog: if the browser receives nothing for this many
+# seconds (frozen or lost connection), it hides the screen, shows "Station
+# hors service" and reloads as soon as the service answers. The service
+# sends a sign of life three times in this delay.
+watchdog_seconds = 10
 # Idle screen: a new security tip every N seconds.
 tip_change_seconds = 20
 # Sounds at the result (autoplay allowed for 127.0.0.1 in the kiosk).

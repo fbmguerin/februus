@@ -79,6 +79,7 @@ class WebConfig:
     preview_screens: bool
     poll_interval_ms: int
     stream_seconds: int
+    watchdog_seconds: int
     tip_change_seconds: int
     sounds: bool
 
@@ -179,6 +180,7 @@ def parse_config(data: Mapping[str, Any], sources: tuple[Path, ...] = ()) -> Con
     preview_screens = web.get_bool("preview_screens")
     poll_interval = web.get_int("poll_interval_ms", minimum=100)
     stream_seconds = web.get_int("stream_seconds", minimum=1)
+    watchdog_seconds = web.get_int("watchdog_seconds", minimum=3)
     tip_change = web.get_int("tip_change_seconds", minimum=1)
     sounds = web.get_bool("sounds")
     web.finish()
@@ -213,6 +215,7 @@ def parse_config(data: Mapping[str, Any], sources: tuple[Path, ...] = ()) -> Con
             preview_screens=preview_screens,
             poll_interval_ms=poll_interval,
             stream_seconds=stream_seconds,
+            watchdog_seconds=watchdog_seconds,
             tip_change_seconds=tip_change,
             sounds=sounds,
         ),

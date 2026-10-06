@@ -10,8 +10,11 @@ résultat.
 
 Live updates: ``/events`` is a Server-Sent Events stream. It sends the
 ``<main>`` part of the screen each time it changes, with a key; the page
-replaces its ``<main>`` (static/live.js), or reloads itself when the key
-changes (other screen: new colors and sounds).
+replaces its ``<main>`` (``/static/live.js``, rendered from
+templates/live.js), or reloads itself when the key changes (other screen:
+new colors and sounds). In between it sends a sign of life, so that the
+page can tell a frozen stream from a screen that does not change: without
+news for ``web.watchdog_seconds`` it shows "station out of service".
 
 The texts are in simple French, written in the templates and in messages.py.
 
@@ -75,6 +78,17 @@ def create_app(
 
     # No API documentation pages: the kiosk only shows the screens.
     app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None)
+
+    # Before the /static folder: the script is rendered with the settings
+    # (the theme's base.html keeps the same path).
+    @app.get("/static/live.js")
+    def live_script() -> Response:
+        script = environment.get_template("live.js").render(
+            watchdog_ms=web.watchdog_seconds * 1000,
+            lost_html=main_part(Screen("degraded")),
+        )
+        return Response(script, media_type="text/javascript", headers={"Cache-Control": "no-cache"})
+
     app.mount("/static", StaticFiles(directory=WEB_DIR / "static"), name="static")
     if (theme_dir / "static").is_dir():
         app.mount("/theme", StaticFiles(directory=theme_dir / "static"), name="theme")
@@ -134,13 +148,20 @@ def create_app(
             # Ask the browser to reconnect quickly when this stream ends.
             yield f"retry: {web.poll_interval_ms}\n\n"
             deadline = time.monotonic() + web.stream_seconds
+            # A sign of life three times per watchdog delay of the page.
+            alive_every = web.watchdog_seconds / 3
             last = None
+            last_sent = time.monotonic()
             while time.monotonic() < deadline and not await request.is_disconnected():
                 screen = await run_in_threadpool(read_screen)
                 payload = json.dumps({"key": _screen_key(screen), "main": main_part(screen)})
                 if payload != last:
                     yield f"event: screen\ndata: {payload}\n\n"
                     last = payload
+                    last_sent = time.monotonic()
+                elif time.monotonic() - last_sent >= alive_every:
+                    yield "event: alive\ndata: \n\n"
+                    last_sent = time.monotonic()
                 await asyncio.sleep(web.poll_interval_ms / 1000)
 
         return StreamingResponse(

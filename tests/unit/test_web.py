@@ -235,15 +235,23 @@ def make_client(raw, status, **kwargs):
     return TestClient(create_app(parse_config(raw), status, theme_dir=NO_THEME, **kwargs))
 
 
-def screen_events(client) -> list[dict]:
-    """All "screen" events of one live stream (it lasts stream_seconds)."""
+def stream_events(client) -> list[tuple[str, str]]:
+    """(event name, data) of one live stream (it lasts stream_seconds)."""
     events = []
+    name = ""
     with client.stream("GET", "/events") as response:
         assert response.headers["content-type"].startswith("text/event-stream")
         for line in response.iter_lines():
-            if line.startswith("data: "):
-                events.append(json.loads(line.removeprefix("data: ")))
+            if line.startswith("event: "):
+                name = line.removeprefix("event: ")
+            elif line.startswith("data: "):
+                events.append((name, line.removeprefix("data: ")))
     return events
+
+
+def screen_events(client) -> list[dict]:
+    """All "screen" events of one live stream."""
+    return [json.loads(data) for name, data in stream_events(client) if name == "screen"]
 
 
 def test_live_stream_sends_the_screen_once(client):
@@ -268,6 +276,28 @@ def test_live_page_loads_the_script_and_preview_does_not(client):
     assert "/static/live.js" in client.get("/").text
     assert "/static/live.js" not in client.get("/preview/scanning").text
     assert client.get("/static/live.js").status_code == 200
+
+
+def test_live_stream_sends_signs_of_life_between_changes(raw, status):
+    # watchdog 3 s: a sign of life every second; the stream lasts 2 s.
+    raw["web"]["watchdog_seconds"] = 3
+    raw["web"]["stream_seconds"] = 2
+    names = [name for name, _ in stream_events(make_client(raw, status))]
+    assert names[0] == "screen"
+    assert names.count("screen") == 1
+    assert names.count("alive") >= 1
+
+
+def test_live_script_has_the_watchdog_and_the_out_of_service_text(raw, status):
+    raw["web"]["watchdog_seconds"] = 7
+    response = make_client(raw, status).get("/static/live.js")
+    assert response.status_code == 200
+    assert response.headers["content-type"].startswith("text/javascript")
+    script = response.text
+    assert "const WATCHDOG_MS = 7000;" in script
+    assert "Station hors service" in script
+    # The HTML is a JSON string: no raw "<" that could close a <script>.
+    assert "<h1>" not in script
 
 
 def test_long_scan_shows_come_back_time(raw, status):

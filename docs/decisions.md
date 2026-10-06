@@ -643,3 +643,28 @@ to keep STATUS short.
   restores it at boot). Fixed value, not a TOML setting: deploy, not Februus.
   The default output is the analog one (internal speaker or jack); sound
   through the DisplayPort/HDMI screen is not set up.
+- 2026-10-06 — Live screen watchdog (found on f1: after some reboots the
+  kiosk screen stayed on "Insérez votre clé USB" while the keys were
+  analyzed and red; once the red came 5 minutes late, once never, and
+  Firefox had no connection to the service any more). The server was checked
+  apart (a change after 40 s of silence is sent at once). In every failed
+  boot Firefox opened the live stream while the network came up (cable,
+  router advertisement): Firefox reacts to network changes and its stream
+  froze or closed without reconnecting. Risk: an OLD verdict (green) could
+  stay on screen. Fix, whatever the cause:
+  - `/events` sends a sign of life (`event: alive`) three times per
+    `web.watchdog_seconds` (new required setting, 10 s) when the screen
+    does not change;
+  - `live.js` (now rendered by the server from `templates/live.js`, at the
+    same path `/static/live.js`, so themes need no change) hides the screen
+    behind "Station hors service" (the degraded template of the theme) and
+    stops the sounds when nothing came for that delay, then reloads
+    (`/?watchdog`, counted in the journal) only once `/` answers: a failed
+    reload would leave a browser error page without the script.
+  Also, Firefox ignores network changes (`policies.json`, locked:
+  `network.notify.changed`, `network.manage-offline-status`, connectivity
+  and captive portal services off): the station only talks to 127.0.0.1.
+  Not chosen: another browser now (Chromium has the same network logic;
+  Cog, a WebKit kiosk browser, is a lead in STATUS: no policy file, all the
+  kiosk checks to redo). An old `/etc/februus/februus.toml` must get
+  `watchdog_seconds` in `[web]` (install.sh stops and says so).
