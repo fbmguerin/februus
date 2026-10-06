@@ -248,6 +248,9 @@ if [ "$KIOSK" = yes ]; then
   install -d -m 755 /usr/local/lib/februus
   install -m 755 "$REPO/deploy/kiosk/wait-for-gpu.sh" /usr/local/lib/februus/wait-for-gpu.sh
   install -m 644 "$REPO/deploy/kiosk/februus-kiosk.service" /etc/systemd/system/februus-kiosk.service
+  # Forget the files cached by the kiosk browser (style sheets of an older
+  # version or theme). Only the cache: the profile is kept.
+  rm -rf /var/lib/februus-kiosk/.cache/mozilla
   # One rescue text console (tty2), none on tty3 to tty6 (next boot).
   install -d -m 755 /etc/systemd/logind.conf.d
   install -m 644 "$REPO/deploy/logind/februus.conf" /etc/systemd/logind.conf.d/februus.conf

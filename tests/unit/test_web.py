@@ -289,6 +289,12 @@ def test_live_stream_sends_signs_of_life_between_changes(raw, status):
     assert names.count("alive") >= 1
 
 
+def test_files_are_checked_again_at_each_load(client):
+    # After an update the kiosk must not keep an old style sheet.
+    for path in ("/", "/static/style.css", "/static/live.js"):
+        assert client.get(path).headers["cache-control"] == "no-cache"
+
+
 def test_live_stream_ends_when_the_server_stops(raw, status):
     raw["web"]["stream_seconds"] = 30
     client = TestClient(create_app(

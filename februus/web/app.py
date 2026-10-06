@@ -90,7 +90,16 @@ def create_app(
             watchdog_ms=web.watchdog_seconds * 1000,
             lost_html=main_part(Screen("degraded")),
         )
-        return Response(script, media_type="text/javascript", headers={"Cache-Control": "no-cache"})
+        return Response(script, media_type="text/javascript")
+
+    @app.middleware("http")
+    async def no_stale_files(request: Request, call_next: Callable[[Request], Any]) -> Response:
+        # The kiosk browser must ask again for every file at each load (an
+        # answer "not modified" is cheap): else, after an update of the code
+        # or of the theme, it kept its old copy of the style sheets.
+        response = await call_next(request)
+        response.headers.setdefault("Cache-Control", "no-cache")
+        return response
 
     app.mount("/static", StaticFiles(directory=WEB_DIR / "static"), name="static")
     if (theme_dir / "static").is_dir():

@@ -681,3 +681,12 @@ to keep STATUS short.
   console kept ready on tty6). Ctrl+Alt+F2 is the rescue console; F3 to F6
   are empty. Read by logind at boot (no restart of logind by install.sh: it
   would end the kiosk session).
+- 2026-10-06 — Every answer of the web UI says `Cache-Control: no-cache`
+  (f1: after the theme was updated, the kiosk kept showing the old style
+  sheet; at boot Firefox did not even ask for it). Without that header
+  Firefox keeps a file without asking for about 10 % of its age (a CSS
+  installed 2 hours before: 12 minutes). Reproduced with headless Firefox
+  and a 2-hour-old CSS: old style without the header, new style with it.
+  The browser now checks every file at each load (a "not modified" answer on
+  127.0.0.1 costs nothing). `install.sh --kiosk` also deletes the cache of the
+  kiosk browser (`/var/lib/februus-kiosk/.cache/mozilla`).
