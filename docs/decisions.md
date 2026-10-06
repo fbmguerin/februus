@@ -626,3 +626,9 @@ to keep STATUS short.
   `update-grub`: `/etc/default/grub` itself is left as Debian wrote it, so a
   Debian update never conflicts with it. Fixed values (no TOML setting): a
   station that sleeps is never wanted.
+- 2026-10-06 — No sudo on the stations (user): Debian is installed without
+  it, root is reached with `su -`. Scripts say "run as root (su -)",
+  `tools/station-report.sh` uses `runuser -u februus --` (util-linux, always
+  present), and every guide says "as root (`su -`)". `.devcontainer/` keeps
+  sudo (another environment). Old results in `docs/hardware-validation.md`
+  keep the commands that were really typed.

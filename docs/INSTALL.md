@@ -22,7 +22,7 @@ Time: about 1 hour, part of it waiting for downloads.
 Download the installer **`debian-13.7.0-amd64-netinst.iso`** (64-bit, small, the
 rest is downloaded during the installation) from
 <https://www.debian.org/distrib/netinst> (a newer `13.x` is fine), and write
-it on a USB stick (on Linux: `sudo dd if=debian-13.7.0-amd64-netinst.iso
+it on a USB stick (on Linux, as root: `dd if=debian-13.7.0-amd64-netinst.iso
 of=/dev/<the-stick> bs=4M status=progress conv=fsync`; on Windows: Rufus, DD
 mode). **Check the name of the stick before `dd`: it erases it.**
 

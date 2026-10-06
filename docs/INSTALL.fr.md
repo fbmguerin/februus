@@ -26,7 +26,7 @@ Durée : environ 1 heure, dont une partie d'attente (téléchargements).
 Téléchargez l'installateur **`debian-13.7.0-amd64-netinst.iso`** (64 bits,
 petit, le reste se télécharge pendant l'installation) sur
 <https://www.debian.org/distrib/netinst> (un `13.x` plus récent convient) et
-écrivez-le sur une clé USB (sous Linux : `sudo dd
+écrivez-le sur une clé USB (sous Linux, en root : `dd
 if=debian-13.7.0-amd64-netinst.iso of=/dev/<la-cle> bs=4M status=progress
 conv=fsync` ; sous Windows : Rufus, mode DD). **Vérifiez le nom de la clé
 avant `dd` : il l'efface.**

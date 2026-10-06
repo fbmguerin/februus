@@ -1,6 +1,6 @@
 #!/bin/bash
 # Install or update Februus on a Debian 13 station. Run as root, from a
-# copy of the repository:   sudo deploy/install.sh [options]
+# copy of the repository (su -):   deploy/install.sh [options]
 #
 # The script can be run again after each update of the code: every step
 # replaces what the previous run installed. It never touches
@@ -47,7 +47,7 @@ if [ -n "$THEME" ] && ! { [ -d "$THEME/templates" ] || [ -d "$THEME/static" ]; }
   echo "invalid theme: '$THEME' has no templates/ or static/ folder" >&2
   exit 2
 fi
-[ "$(id -u)" = 0 ] || { echo "run as root: sudo $0" >&2; exit 1; }
+[ "$(id -u)" = 0 ] || { echo "run as root (su -): $0" >&2; exit 1; }
 REPO="$(cd "$(dirname "$0")/.." && pwd)"
 PATH="$PATH:/usr/sbin:/sbin"
 step() { echo; echo "== $*"; }

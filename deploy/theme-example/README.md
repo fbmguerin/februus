@@ -8,15 +8,15 @@ code of Februus. It is a folder with:
 - `static/`: files served as `/theme/...` (CSS, fonts, pictures). Nothing may
   be loaded from another site: a station has no Internet access.
 
-Install it (as `root`, from the repository):
+Install it (as root, `su -`, from the repository):
 
 ```
-sudo deploy/install.sh --theme /path/to/the/theme-folder
+deploy/install.sh --theme /path/to/the/theme-folder
 ```
 
 Only its `templates/` and `static/` folders are copied to `/etc/februus/theme`
 (owned by `root`, read-only for the service) and the service is restarted. To go back to the plain screens:
-`sudo rm -r /etc/februus/theme && sudo systemctl restart februus`.
+`rm -r /etc/februus/theme && systemctl restart februus` (as root).
 
 What a theme must keep (see the comment in `templates/base.html`): the
 `<body>` classes and `data-key`, one `<main>` with the notice include and the

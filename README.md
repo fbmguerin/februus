@@ -115,14 +115,14 @@ Other commands: `februus --help`, and the list in [AGENTS.md](AGENTS.md)
 
 **Step-by-step guide, copy and paste: [docs/INSTALL.md](docs/INSTALL.md)** ([en français](docs/INSTALL.fr.md)).
 
-On Debian 13, from a copy of the repository:
+On Debian 13, as root (`su -`), from a copy of the repository:
 
 ```
-sudo deploy/install.sh --name f3    # first install: name of the station
-sudo deploy/install.sh              # packages, accounts, rules, services
-sudo deploy/install.sh --usbguard   # also the USBGuard rules: the devices
-                                    # plugged in now (keyboard, mouse) are
-                                    # the only non-storage devices allowed
+deploy/install.sh --name f3    # first install: name of the station
+deploy/install.sh              # packages, accounts, rules, services
+deploy/install.sh --usbguard   # also the USBGuard rules: the devices
+                               # plugged in now (keyboard, mouse) are
+                               # the only non-storage devices allowed
 ```
 
 Stations are named f1, f2, ... f12 (no leading zeros). `--name` sets

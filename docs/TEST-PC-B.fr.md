@@ -41,12 +41,13 @@ Au lieu de 12 clés, **deux** clés sont rechargées autant de fois qu'il faut a
 `tools/load-test-key.sh` (après l'installation du guide, le dépôt est dans
 `/usr/local/src/februus`). L'outil efface la clé, puis y écrit les fichiers d'un
 kit. Par sécurité, il refuse tout ce qui n'est pas une petite clé USB amovible
-sans rien de monté, et demande de retaper le nom du périphérique.
+sans rien de monté, et demande de retaper le nom du périphérique. En root
+(`su -`) :
 
 ```
 cd /usr/local/src/februus
 lsblk -o NAME,SIZE,MODEL,TRAN       # repérer la clé : /dev/sdb par exemple (pas une partition !)
-sudo tools/load-test-key.sh /dev/sdb eicar
+tools/load-test-key.sh /dev/sdb eicar
 ```
 
 Puis **débranchez la clé et rebranchez-la** : la station l'analyse. Attendez la
@@ -56,7 +57,7 @@ et ceux d'USBGuard.
 
 | Kit | Commande (`/dev/sdb` = la clé) | Attendu |
 |---|---|---|
-| saine FAT32 (26 fichiers ordinaires) | `sudo tools/load-test-key.sh /dev/sdb clean` | **vert** (2.2) |
+| saine FAT32 (26 fichiers ordinaires) | `tools/load-test-key.sh /dev/sdb clean` | **vert** (2.2) |
 | NTFS, exFAT | `... ntfs`, `... exfat` | **vert** |
 | EICAR | `... eicar` | **rouge** `clamav.detected` (2.3, 7.3) |
 | EICAR dans un zip | `... eicar-zip` | **rouge** `clamav.detected` |
@@ -101,9 +102,9 @@ premiers Mo pour cette raison ; un formatage rapide ne le fait pas.
 | 6 | Kiosque | étape 6 du guide, redémarrage. Écran au démarrage, sons (vert, orange, rouge, alarme) entendus par une personne, raccourcis clavier (Ctrl+L, Ctrl+T, F11, Ctrl+Alt+F3) sans moyen de sortir | 7.12, 8.1-8.7 | 40 min |
 | 7 | Thème | « Thème de la préfecture de la Moselle » du guide (**lire l'avertissement**), puis vérifier tous les écrans avec les clés de la phase 3 (attente, analyse, vert, orange, rouge, clé retirée, deux clés, appareil bloqué) | — | 25 min |
 | 8 | Recette avec un agent | une personne qui ne connaît pas le projet, avec la seule affiche, sans aide : les kits `clean` (vert), `eicar` (rouge), puis elle retire la clé pendant l'analyse du kit `big`. Noter les hésitations et les fausses interprétations | T15 | 20 min |
-| 9 | Clôture | `sudo tools/station-report.sh` après les phases ; écrire les résultats ; commiter les corrections du guide | — | 20 min |
+| 9 | Clôture | `tools/station-report.sh` (en root) après les phases ; écrire les résultats ; commiter les corrections du guide | — | 20 min |
 
-Lancez `sudo tools/station-report.sh > /root/rapport-phase<N>.txt` à la fin de
+En root (`su -`), lancez `tools/station-report.sh > /root/rapport-phase<N>.txt` à la fin de
 chaque phase : c'est un instantané en lecture seule (services, âge des
 signatures, appareils USBGuard, montages, dernières clés, journal). Collez-le
 dans un message pour obtenir de l'aide.

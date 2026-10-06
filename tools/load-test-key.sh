@@ -2,7 +2,7 @@
 # Load a USB key with a test "kit" (acceptance test, docs/TEST-PC-B.md), so that
 # two keys are enough for all the checks. DESTROYS everything on the key.
 #
-#   sudo tools/load-test-key.sh /dev/sdX <kit> [iso-file]
+#   tools/load-test-key.sh /dev/sdX <kit> [iso-file]   (as root, su -)
 #
 # Kits: clean, eicar, eicar-zip, encrypted, nested, big (900 MB), toobig
 # (1.1 GB), ntfs, exfat, two-partitions, two-partitions-eicar, iso <file>.
@@ -17,7 +17,7 @@ DISK="${1:-}"; KIT="${2:-}"; ISO="${3:-}"
 KITS="clean eicar eicar-zip encrypted nested big toobig ntfs exfat two-partitions two-partitions-eicar iso"
 die() { echo "load-test-key: $*" >&2; exit 1; }
 
-[ "$(id -u)" = 0 ] || die "run as root: sudo $0 ..."
+[ "$(id -u)" = 0 ] || die "run as root (su -): $0 ..."
 [ -n "$DISK" ] && [ -n "$KIT" ] || die "usage: $0 /dev/sdX <kit> [iso-file]   (kits: $KITS)"
 case " $KITS " in *" $KIT "*) ;; *) die "unknown kit '$KIT' (kits: $KITS)";; esac
 [ -b "$DISK" ] || die "$DISK is not a block device"

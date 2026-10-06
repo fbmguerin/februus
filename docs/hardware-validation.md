@@ -76,16 +76,16 @@ key. The former checks 4.1 to 4.3 are deleted; check 2.10 replaces them.
 
 | # | Check | Expected | Result |
 |---|---|---|---|
-| 6.1 | `sudo deploy/install.sh --name f9` | `hostname` and the screens show `f9`; `getent hosts f9` gives 127.0.1.1; `sudo` does not warn "unable to resolve host" | |
-| 6.2 | `sudo deploy/install.sh --name F9` (also `f_9`) | Refused before any change (exit code 2) | |
-| 6.3 | `sudo deploy/install.sh` again (no option) | Name kept, "station name: f9" printed | |
+| 6.1 | `deploy/install.sh --name f9` (as root, `su -`) | `hostname` and the screens show `f9`; `getent hosts f9` gives 127.0.1.1; `su -` and `hostname -f` do not warn "unable to resolve host" | |
+| 6.2 | `deploy/install.sh --name F9` (also `f_9`) | Refused before any change (exit code 2) | |
+| 6.3 | `deploy/install.sh` again (no option) | Name kept, "station name: f9" printed | |
 
 ## 7. One service (step 3, 2026-10-04)
 
 Done on 2026-10-05 except 7.12 (reboot), see Result. It replaces the former
 section 7 (analyzers under their own account), removed with the service
 `februus-analyzer` (D17). Before: edit `/etc/februus/februus.toml` (see
-`docs/decisions.md`, step 3), then `sudo deploy/install.sh`.
+`docs/decisions.md`, step 3), then `deploy/install.sh` (as root).
 
 | # | Check | Expected | Result |
 |---|---|---|---|
@@ -97,8 +97,8 @@ section 7 (analyzers under their own account), removed with the service
 | 7.6 | Key removed during the analysis | Red "removed"; no child process left | OK (key pulled by the user during an analysis, 10 files): red `device.removed`, `removed: true` in the key log, nothing mounted, no child left. The journal gets a traceback (`udisksctl unmount failed: Error looking up object`) from the unmount of the vanished key: noisy, verdict right |
 | 7.7 | `kill -9` the main process during an analysis | systemd restarts it; no child process left; a key mounted at the time of the kill gives RED ("already mounted"), a key not yet mounted is analyzed again | OK, with a different outcome than expected: systemd restarted the service (NRestarts=1), no child left. The key was mounted when killed, so the new session is RED (`internal.error`, "already mounted"), like 2.9: fail-closed, the key must be unplugged. Mount removed by hand afterwards; then green again. Expected text corrected |
 | 7.8 | `systemctl stop februus` with a green result on screen | The browser shows an error, never the old green | OK: with the service stopped the screen does not answer (connection refused), the old green is not shown |
-| 7.9 | After 7.3 to 7.6: `sudo cat /var/log/februus/keys.jsonl`, `ls -l /var/log/februus` | One line per key; no file name except the files with a warning; folder `februus:februus` 0750, file 0640 | OK: `/var/log/februus` is `februus:februus` 0750, `keys.jsonl` 0640; one line per key; the line of a problem has only the code (no file name for a clean key) |
-| 7.10 | `sudo -u februus februus stats` | Counts match the keys of this section | OK: `sudo -u februus februus stats` showed 4 sessions, 4 green, 20 files = the 4 lines of the log at that time |
+| 7.9 | After 7.3 to 7.6, as root: `cat /var/log/februus/keys.jsonl`, `ls -l /var/log/februus` | One line per key; no file name except the files with a warning; folder `februus:februus` 0750, file 0640 | OK: `/var/log/februus` is `februus:februus` 0750, `keys.jsonl` 0640; one line per key; the line of a problem has only the code (no file name for a clean key) |
+| 7.10 | `runuser -u februus -- februus stats` (as root) | Counts match the keys of this section | OK: `sudo -u februus februus stats` showed 4 sessions, 4 green, 20 files = the 4 lines of the log at that time |
 | 7.11 | `systemd-analyze security februus.service` | Exposure noted here | Exposure 2.9 OK. No `ProtectSystem`, `PrivateTmp`, `PrivateNetwork` etc. (wanted: clamd under AppArmor, loopback for the screens). `UMask` not set |
 | 7.12 | Reboot the PC | The service starts by itself, the screens answer on `127.0.0.1:8080` (T14) | OK (2026-10-05): after the reboot `februus.service` started by itself 8 s after boot (`enabled`, `NRestarts=0`), screens answer on `127.0.0.1:8080`, clamd and USBGuard active. Both keys were plugged in at boot: the first was analyzed (green), the second ignored ("still plugged in"). The kiosk (no desktop session) is still NOT tested: this PC has a desktop session (`francois`, tty2) |
 
