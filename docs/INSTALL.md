@@ -13,6 +13,8 @@ Time: about 1 hour, part of it waiting for downloads.
 - A mini PC with screen, keyboard, mouse, speaker and a network cable
   (Internet is needed for the installation, then to update the antivirus
   signatures).
+- A screen connected with **HDMI or DisplayPort**. Avoid VGA: on the first
+  tries it gave a cut picture and a screen going to sleep.
 - A USB stick with the Debian 13 installer.
 - The name of the station: `f1`, `f2`, ... `f12` (no leading zero).
 - A test USB key (optional, to check at the end).
@@ -142,12 +144,16 @@ installed with Firefox and `cage` (a tiny window manager).
 reboot
 ```
 
-After the reboot, the screen "Insérez votre clé USB" ("Insert your USB key") must appear by itself.
+After the reboot, the screen "Insérez votre clé USB" ("Insert your USB key")
+must appear by itself. Before it, for up to about 30 seconds, you may see
+lines of text or a black screen: the kiosk waits for the graphics driver.
 
-> The kiosk was tried in a window, **not yet at the boot of a PC without
-> desktop** (see `docs/hardware-validation.md`, section 8). If the screen
-> stays black, log in over SSH and look at `journalctl -u februus-kiosk -b`;
-> the station itself (the analysis of keys) keeps working.
+If after one minute the screen still shows lines of text (for example
+`Found 0 GPUs` or `Unable to create the wlroots backend`), a login prompt, or
+stays black, the kiosk did not start: see [Get back control of a station in
+kiosk mode](#get-back-control-of-a-station-in-kiosk-mode) and look at
+`journalctl -u februus-kiosk -b`. The station itself (the analysis of keys)
+keeps working.
 
 To be even cleaner, then do the checks of sections 7 and 8 of
 `docs/hardware-validation.md` (write the results in the "Result" column).
@@ -254,6 +260,27 @@ with `config/februus.example.toml`).
 | See what happened | `journalctl -u februus -f` (live), `februus stats`, `cat /var/log/februus/keys.jsonl` |
 | Keyboard or mouse blocked after `--usbguard` | The script detects it and puts the old rules back by itself. Otherwise: `systemctl stop usbguard` |
 | Change the name of the station | `./deploy/install.sh --name f4` |
+| The kiosk does not start, or you need a terminal on the station | See the next section |
+
+## Get back control of a station in kiosk mode
+
+The kiosk takes the whole screen on purpose. To get a terminal on the station:
+
+1. **Change console:** press **Ctrl+Alt+F2**. A text console asks for a login
+   (`root`, or your user then `su -`). **Ctrl+Alt+F1** goes back to the
+   kiosk.
+2. **Start without the kiosk** (if the screen is stuck): restart the PC. In
+   the GRUB menu (the list shown at the start), press `e`. Go to the end of
+   the line that starts with `linux` and add ` 3` (a space, then 3). Press
+   **Ctrl+X** to start. The PC starts in text mode, without the kiosk (the
+   kiosk belongs to the graphical mode). This is for this boot only: the next
+   normal reboot starts the kiosk again.
+   - GRUB always uses an **English (QWERTY) keyboard**. On a French AZERTY
+     keyboard, `3` is the key `"` **without** Shift.
+   - If the GRUB menu does not show, hold **Esc** (or **Shift**) during the
+     start of the PC.
+3. **Otherwise, use SSH** from another PC: `ssh <user>@<station-address>`,
+   then `su -`.
 
 ## What the installation put on the PC
 

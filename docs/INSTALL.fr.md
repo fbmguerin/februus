@@ -17,6 +17,8 @@ Durée : environ 1 heure, dont une partie d'attente (téléchargements).
 - Un mini PC avec écran, clavier, souris, haut-parleur, et un câble réseau
   (Internet est nécessaire pour l'installation, puis pour mettre à jour les
   signatures de l'antivirus).
+- Un écran branché en **HDMI ou DisplayPort**. Évitez le VGA : aux premiers
+  essais, il a donné une image coupée et un écran qui se met en veille.
 - Une clé USB d'installation de Debian 13.
 - Le nom de la station : `f1`, `f2`, ... `f12` (sans zéro devant).
 - Une clé USB de test (facultatif, pour vérifier à la fin).
@@ -148,12 +150,15 @@ reboot
 ```
 
 Au redémarrage, l'écran « Insérez votre clé USB » doit apparaître tout seul.
+Avant, pendant 30 secondes au plus, vous pouvez voir des lignes de texte ou un
+écran noir : le kiosque attend le pilote graphique.
 
-> Le kiosque a été essayé dans une fenêtre, **pas encore au démarrage d'un PC
-> sans bureau** (voir `docs/hardware-validation.md`, section 8). Si l'écran
-> reste noir, connectez-vous en SSH et regardez
-> `journalctl -u februus-kiosk -b` ; la station elle-même (l'analyse des clés)
-> continue de marcher.
+Si, au bout d'une minute, l'écran montre encore des lignes de texte (par
+exemple `Found 0 GPUs` ou `Unable to create the wlroots backend`), une invite
+de connexion, ou reste noir, le kiosque n'a pas démarré : voir [Reprendre la
+main sur une station en kiosque](#reprendre-la-main-sur-une-station-en-kiosque)
+et regarder `journalctl -u februus-kiosk -b`. La station elle-même (l'analyse
+des clés) continue de marcher.
 
 Pour rendre le tout encore plus propre, faites ensuite les contrôles des
 sections 7 et 8 de `docs/hardware-validation.md` (écrivez les résultats dans la
@@ -264,6 +269,28 @@ corriger (comparez avec `config/februus.example.toml`).
 | Voir ce qui s'est passé | `journalctl -u februus -f` (en direct), `februus stats`, `cat /var/log/februus/keys.jsonl` |
 | Clavier ou souris bloqué après `--usbguard` | Le script le détecte et remet les anciennes règles tout seul. Sinon : `systemctl stop usbguard` |
 | Changer le nom de la station | `./deploy/install.sh --name f4` |
+| Le kiosque ne démarre pas, ou il faut un terminal sur la station | Voir la section suivante |
+
+## Reprendre la main sur une station en kiosque
+
+Le kiosque prend tout l'écran, c'est voulu. Pour avoir un terminal sur la
+station :
+
+1. **Changer de console :** appuyez sur **Ctrl+Alt+F2**. Une console texte
+   demande un identifiant (`root`, ou votre utilisateur puis `su -`).
+   **Ctrl+Alt+F1** revient au kiosque.
+2. **Démarrer sans le kiosque** (si l'écran est bloqué) : redémarrez le PC.
+   Dans le menu GRUB (la liste affichée au démarrage), appuyez sur `e`. Allez
+   à la fin de la ligne qui commence par `linux` et ajoutez ` 3` (une espace,
+   puis 3). Appuyez sur **Ctrl+X** pour démarrer. Le PC démarre en mode texte,
+   sans le kiosque (le kiosque fait partie du mode graphique). Cela vaut pour
+   ce démarrage seulement : le prochain redémarrage normal relance le kiosque.
+   - GRUB utilise toujours un **clavier anglais (QWERTY)**. Sur un clavier
+     AZERTY, `3` est la touche `"` **sans** Maj.
+   - Si le menu GRUB ne s'affiche pas, maintenez **Échap** (ou **Maj**)
+     pendant le démarrage du PC.
+3. **Sinon, passez par SSH** depuis un autre PC :
+   `ssh <utilisateur>@<adresse-de-la-station>`, puis `su -`.
 
 ## Ce que l'installation a mis sur le PC
 
