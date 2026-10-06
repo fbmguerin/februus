@@ -598,3 +598,23 @@ to keep STATUS short.
   partition); the inspector is NOT changed (fail-closed, a security rule), the
   question is in STATUS (known issues). `docs/TEST-PC-B.md` (EN/FR) rewritten
   around the two keys.
+- 2026-10-06 — Kiosk at boot (first try of a station without desktop: cage
+  failed with "Found 0 GPUs" and the screen stayed on the errors). Cause: at
+  boot `/dev/dri/card0` is first the generic driver simpledrm; the real one
+  (i915 here) replaces it a few seconds later and cage, started in between,
+  lost its device; systemd then stopped restarting it (default limit: 5
+  starts in 10 s). Fix, independent of the GPU: `deploy/kiosk/wait-for-gpu.sh`
+  (`ExecStartPre`, installed in `/usr/local/lib/februus/`) runs `udevadm
+  settle`, then waits at most 30 s for a DRM card whose driver is not a
+  generic one (simpledrm and its kin); after 30 s it goes on with the generic
+  one (PC or VM without a real driver), and fails only if there is no card at
+  all. `StartLimitIntervalSec=0`: the kiosk never gives up. The 30 s are an
+  argument in the unit, not a TOML setting: the kiosk is a deploy file that
+  does not read the config, and the value is not a business setting.
+  Not chosen: `systemd-udev-settle.service` (deprecated, and does not wait for
+  the driver itself), a fixed `sleep`, a dependency on a GPU-specific device
+  unit.
+- 2026-10-06 — cage runs with `-s` (user): Ctrl+Alt+F2 opens a text console.
+  Without it an administrator at the station was locked in the kiosk. The
+  console asks for a login and password, like SSH; the agents do not have
+  one. Documented in `docs/INSTALL.md` (troubleshooting).

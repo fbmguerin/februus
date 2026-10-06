@@ -227,6 +227,8 @@ if [ "$KIOSK" = yes ]; then
   id februus-kiosk >/dev/null 2>&1 || adduser --system --group --home /var/lib/februus-kiosk februus-kiosk
   install -d -m 755 /usr/lib/firefox-esr/distribution
   install -m 644 "$REPO/deploy/kiosk/policies.json" /usr/lib/firefox-esr/distribution/policies.json
+  install -d -m 755 /usr/local/lib/februus
+  install -m 755 "$REPO/deploy/kiosk/wait-for-gpu.sh" /usr/local/lib/februus/wait-for-gpu.sh
   install -m 644 "$REPO/deploy/kiosk/februus-kiosk.service" /etc/systemd/system/februus-kiosk.service
   systemctl daemon-reload
   systemctl enable februus-kiosk.service
