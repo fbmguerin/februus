@@ -673,3 +673,11 @@ to keep STATUS short.
   kiosk lasts up to `web.stream_seconds` (300 s). `create_app(stopping=...)`:
   the streams end as soon as the server is asked to stop (`serve` and `demo`
   pass `server.should_exit`). No new setting.
+- 2026-10-06 — One rescue console only (user, f1: with `cage -s` every
+  console F1 to F6 could be reached, five of them with a login prompt).
+  `deploy/logind/februus.conf` (installed with `--kiosk` in
+  `/etc/systemd/logind.conf.d/`): `NAutoVTs=2` (a login prompt is started
+  only on tty1 and tty2; tty1 belongs to the kiosk) and `ReserveVT=0` (no
+  console kept ready on tty6). Ctrl+Alt+F2 is the rescue console; F3 to F6
+  are empty. Read by logind at boot (no restart of logind by install.sh: it
+  would end the kiosk session).

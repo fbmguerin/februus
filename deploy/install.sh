@@ -248,6 +248,9 @@ if [ "$KIOSK" = yes ]; then
   install -d -m 755 /usr/local/lib/februus
   install -m 755 "$REPO/deploy/kiosk/wait-for-gpu.sh" /usr/local/lib/februus/wait-for-gpu.sh
   install -m 644 "$REPO/deploy/kiosk/februus-kiosk.service" /etc/systemd/system/februus-kiosk.service
+  # One rescue text console (tty2), none on tty3 to tty6 (next boot).
+  install -d -m 755 /etc/systemd/logind.conf.d
+  install -m 644 "$REPO/deploy/logind/februus.conf" /etc/systemd/logind.conf.d/februus.conf
   systemctl daemon-reload
   systemctl enable februus-kiosk.service
   # Sounds of the screens: the sound card starts muted on a minimal Debian.

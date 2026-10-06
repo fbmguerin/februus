@@ -61,3 +61,9 @@ def test_kiosk_unit_allows_console_switch_and_never_gives_up():
     assert "ExecStartPre=/usr/local/lib/februus/wait-for-gpu.sh" in text
     assert "StartLimitIntervalSec=0" in text
     assert "StandardError=journal" in text
+
+
+def test_one_rescue_console_only():
+    text = (REPO_ROOT / "deploy" / "logind" / "februus.conf").read_text()
+    assert "NAutoVTs=2" in text
+    assert "ReserveVT=0" in text

@@ -268,7 +268,7 @@ The kiosk takes the whole screen on purpose. To get a terminal on the station:
 
 1. **Change console:** press **Ctrl+Alt+F2**. A text console asks for a login
    (`root`, or your user then `su -`). **Ctrl+Alt+F1** goes back to the
-   kiosk.
+   kiosk. Only console 2 has a login: F3 to F6 show an empty screen.
 2. **Start without the kiosk** (if the screen is stuck): restart the PC. In
    the GRUB menu (the list shown at the start), press `e`. Go to the end of
    the line that starts with `linux` and add ` 3` (a space, then 3). Press

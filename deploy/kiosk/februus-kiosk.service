@@ -37,7 +37,8 @@ UtmpMode=user
 # FR : attendre le vrai pilote graphique avant de lancer cage.
 ExecStartPre=/usr/local/lib/februus/wait-for-gpu.sh 30
 # -s: Ctrl+Alt+F2 opens a text console (login with a password), the way
-# out for an administrator (docs/INSTALL.md, troubleshooting).
+# out for an administrator (docs/INSTALL.md, troubleshooting). Only tty2
+# has a login (deploy/logind/februus.conf).
 # FR : -s permet de changer de console (Ctrl+Alt+F2) pour l'administrateur.
 ExecStart=/usr/bin/cage -s -- /usr/bin/firefox-esr --kiosk http://127.0.0.1:8080
 Restart=always

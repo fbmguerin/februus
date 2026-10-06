@@ -119,7 +119,7 @@ no console 1, no desktop-free PC).
 | 8.6 | Keyboard shortcuts (Ctrl+L, Ctrl+T, F11, Ctrl+Alt+F3...) | No way to open another page or a shell | Not done (needs a human at the keyboard, in the real kiosk) |
 | 8.7 | polkit: no desktop session means no user allowed to mount keys | Only `februus` mounts keys | Not done (needs test B) |
 | 8.8 | Kiosk at boot, 5 reboots: `journalctl -b -u februus-kiosk -o short-precise`, `journalctl -b -k \| grep -i -E 'drm\|simpledrm\|i915'` | The kiosk appears by itself each time; the journal shows `graphics driver ready` before cage, no "Found 0 GPUs" | |
-| 8.9 | In the kiosk: Ctrl+Alt+F2, then Ctrl+Alt+F1 | A text console asking for a login, then back to the kiosk | |
+| 8.9 | In the kiosk: Ctrl+Alt+F2, then Ctrl+Alt+F1; also F3 to F6 | F2: a text console asking for a login, then back to the kiosk; F3 to F6: no login | |
 | 8.10 | `cat /proc/cmdline`; `systemctl is-enabled sleep.target suspend.target hibernate.target hybrid-sleep.target` | `consoleblank=0`; the four targets `masked` | |
 | 8.11 | Leave the station alone 15 minutes (kiosk, then text console) | The screen stays on | |
 
