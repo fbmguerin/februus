@@ -3,6 +3,7 @@
 import copy
 import json
 import re
+import time
 import tomllib
 from datetime import datetime
 from pathlib import Path
@@ -286,6 +287,16 @@ def test_live_stream_sends_signs_of_life_between_changes(raw, status):
     assert names[0] == "screen"
     assert names.count("screen") == 1
     assert names.count("alive") >= 1
+
+
+def test_live_stream_ends_when_the_server_stops(raw, status):
+    raw["web"]["stream_seconds"] = 30
+    client = TestClient(create_app(
+        parse_config(raw), status, theme_dir=NO_THEME, stopping=lambda: True
+    ))
+    started = time.monotonic()
+    stream_events(client)
+    assert time.monotonic() - started < 5
 
 
 def test_live_script_has_the_watchdog_and_the_out_of_service_text(raw, status):

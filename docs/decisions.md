@@ -668,3 +668,8 @@ to keep STATUS short.
   Cog, a WebKit kiosk browser, is a lead in STATUS: no policy file, all the
   kiosk checks to redo). An old `/etc/februus/februus.toml` must get
   `watchdog_seconds` in `[web]` (install.sh stops and says so).
+- 2026-10-06 — `systemctl stop februus` waited 90 s then killed the service
+  (f1): uvicorn waits for the open connections, and the live stream of the
+  kiosk lasts up to `web.stream_seconds` (300 s). `create_app(stopping=...)`:
+  the streams end as soon as the server is asked to stop (`serve` and `demo`
+  pass `server.should_exit`). No new setting.

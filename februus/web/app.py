@@ -64,12 +64,15 @@ def create_app(
     scanner_alive: Callable[[], bool] = lambda: True,
     now: Callable[[], datetime] = datetime.now,
     theme_dir: Path = THEME_DIR,
+    stopping: Callable[[], bool] = lambda: False,
 ) -> FastAPI:
     """Build the web application for this configuration.
 
     ``status`` is what the scanner shows, ``scanner_alive`` tells whether
     the scanner still runs, ``now`` gives the local time and ``theme_dir``
-    the optional theme (both replaced in tests).
+    the optional theme (both replaced in tests). ``stopping`` tells that the
+    server is stopping: the live streams then end at once (the server waits
+    for them before it exits).
     """
     web = config.web
     environment = _environment(theme_dir)
@@ -152,7 +155,11 @@ def create_app(
             alive_every = web.watchdog_seconds / 3
             last = None
             last_sent = time.monotonic()
-            while time.monotonic() < deadline and not await request.is_disconnected():
+            while (
+                time.monotonic() < deadline
+                and not stopping()
+                and not await request.is_disconnected()
+            ):
                 screen = await run_in_threadpool(read_screen)
                 payload = json.dumps({"key": _screen_key(screen), "main": main_part(screen)})
                 if payload != last:
