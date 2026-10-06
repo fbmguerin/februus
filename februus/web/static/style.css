@@ -26,6 +26,9 @@ html, body {
   margin: 0;
 }
 
+/* Kiosk: a click or a drag of the mouse never selects (highlights) text. */
+html { user-select: none; }
+
 /* Every screen: the color of the verdict as background. Layout: a top bar
    (name) and a bottom bar (station, status) frame the texts; the three
    share the same left and right margin. */
