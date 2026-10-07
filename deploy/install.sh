@@ -70,7 +70,7 @@ fi
 step "1. Debian packages"
 PACKAGES="python3 python3-fastapi python3-uvicorn python3-jinja2
   python3-pyudev clamav-daemon clamav-freshclam udisks2 polkitd usbguard"
-[ "$KIOSK" = yes ] && PACKAGES="$PACKAGES cage firefox-esr alsa-utils"
+[ "$KIOSK" = yes ] && PACKAGES="$PACKAGES cage firefox-esr alsa-utils kbd"
 if [ "$APT" = yes ]; then
   # shellcheck disable=SC2086
   DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends $PACKAGES

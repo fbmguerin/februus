@@ -690,3 +690,16 @@ to keep STATUS short.
   The browser now checks every file at each load (a "not modified" answer on
   127.0.0.1 costs nothing). `install.sh --kiosk` also deletes the cache of the
   kiosk browser (`/var/lib/februus-kiosk/.cache/mozilla`).
+- 2026-10-07 — Kiosk hardening after one night on f1:
+  - cage started while console 2 was shown (kiosk restarted during a test)
+    logged "Timeout waiting session to become active", "Unable to create the
+    wlroots backend", then hung: no Firefox, SIGTERM ignored, killed after
+    90 s; the screen stayed frozen. `ExecStartPre=+/usr/bin/chvt 1` (as root)
+    puts console 1 in front first; `TimeoutStopSec=10`. A kiosk restart
+    takes the screen back from an administrator on Ctrl+Alt+F2 (wanted for
+    a station). `kbd` (chvt) added to the kiosk packages.
+  - The kiosk Firefox had 5 connections to the Internet (Mozilla push and
+    remote settings, on Google Cloud and Fastly), and its crash reporter ran
+    after crashes at stop (crash reports can hold the page: verdicts). Rule 5
+    (no network except freshclam): `IPAddressDeny=any`,
+    `IPAddressAllow=localhost` and `MOZ_CRASHREPORTER_DISABLE=1` in the unit.

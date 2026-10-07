@@ -32,6 +32,11 @@ StandardOutput=journal
 StandardError=journal
 UtmpIdentifier=tty1
 UtmpMode=user
+# Console 1 in front first (as root, "+"): started while another console is
+# shown (an administrator on Ctrl+Alt+F2), cage waits for its session,
+# gives up after 10 s and then hangs without showing anything (f1).
+# FR : console 1 au premier plan d'abord, sinon cage se bloque.
+ExecStartPre=+/usr/bin/chvt 1
 # At boot the real graphics driver replaces the generic one (simpledrm) a
 # few seconds after the console exists: wait for it (at most 30 s).
 # FR : attendre le vrai pilote graphique avant de lancer cage.
@@ -43,6 +48,16 @@ ExecStartPre=/usr/local/lib/februus/wait-for-gpu.sh 30
 ExecStart=/usr/bin/cage -s -- /usr/bin/firefox-esr --kiosk http://127.0.0.1:8080
 Restart=always
 RestartSec=3
+# A hung cage ignores SIGTERM: kill it after 10 s, not 90.
+TimeoutStopSec=10
+
+# --- Network: the browser only shows the screens of this machine. Without
+# this, Firefox talked to Mozilla services (push, remote settings) and could
+# send crash reports holding the page (verdicts) (f1).
+# FR : le navigateur ne parle qu'à 127.0.0.1 ; pas de rapports de plantage.
+IPAddressDeny=any
+IPAddressAllow=localhost
+Environment=MOZ_CRASHREPORTER_DISABLE=1
 
 [Install]
 WantedBy=graphical.target

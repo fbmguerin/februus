@@ -279,7 +279,9 @@ station :
 1. **Changer de console :** appuyez sur **Ctrl+Alt+F2**. Une console texte
    demande un identifiant (`root`, ou votre utilisateur puis `su -`).
    **Ctrl+Alt+F1** revient au kiosque. Seule la console 2 a une invite de
-   connexion : F3 à F6 affichent un écran vide.
+   connexion : F3 à F6 affichent un écran vide. Si le kiosque redémarre (par
+   exemple `systemctl restart februus-kiosk`), il reprend l'écran : refaites
+   Ctrl+Alt+F2.
 2. **Démarrer sans le kiosque** (si l'écran est bloqué) : redémarrez le PC.
    Dans le menu GRUB (la liste affichée au démarrage), appuyez sur `e`. Allez
    à la fin de la ligne qui commence par `linux` et ajoutez ` 3` (une espace,

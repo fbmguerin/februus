@@ -61,6 +61,15 @@ def test_kiosk_unit_allows_console_switch_and_never_gives_up():
     assert "ExecStartPre=/usr/local/lib/februus/wait-for-gpu.sh" in text
     assert "StartLimitIntervalSec=0" in text
     assert "StandardError=journal" in text
+    assert "ExecStartPre=+/usr/bin/chvt 1" in text
+    assert "TimeoutStopSec=10" in text
+
+
+def test_kiosk_browser_reaches_this_machine_only():
+    text = UNIT.read_text()
+    assert "IPAddressDeny=any" in text
+    assert "IPAddressAllow=localhost" in text
+    assert "MOZ_CRASHREPORTER_DISABLE=1" in text
 
 
 def test_one_rescue_console_only():
