@@ -21,6 +21,12 @@
       {% endfor %}
     </ul>
   {% endif %}
+  {% if screen.big_files %}
+    <p class="details">Fichiers trop gros :</p>
+    <ul class="details">
+      {% for name in screen.big_files %}<li>{{ name }}</li>{% endfor %}
+    </ul>
+  {% endif %}
   {% if screen.color == "orange" %}
     <p>Vous pouvez retirer votre clé. Soyez prudent avec son contenu.</p>
   {% elif screen.color == "red" %}

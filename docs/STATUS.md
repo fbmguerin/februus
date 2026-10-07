@@ -108,8 +108,6 @@ and merged.
   `/etc/februus/februus.toml` (install.sh stops and says so).
 - Kingston DataTraveler 3.0 on f1: USB 3 errors, disk seen after 1 minute
   or never (hardware); red, never green.
-- `test_theme_keeps_the_live_screens_and_the_notice` fails now and then: the
-  tip of the idle screen can change during its 1-second stream (old).
 
 - ETA uses bytes: with thousands of small files it shows 0 while minutes are
   left (about 17 ms per file on FAT32). No time estimate for the first second.

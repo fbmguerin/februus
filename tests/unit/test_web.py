@@ -295,6 +295,15 @@ def test_files_are_checked_again_at_each_load(client):
         assert client.get(path).headers["cache-control"] == "no-cache"
 
 
+def test_result_lists_the_big_files_escaped(client, status):
+    add_session(status, "result", verdict="red", codes=[("file.too_big", "red")],
+                big_files=("sda1/video.mp4", "sda1/<b>x</b>.iso"))
+    text = client.get("/").text
+    assert "trop gros pour être vérifiés" in text
+    assert "sda1/video.mp4" in text
+    assert "&lt;b&gt;x&lt;/b&gt;.iso" in text and "<b>x</b>" not in text
+
+
 def test_live_stream_ends_when_the_server_stops(raw, status):
     raw["web"]["stream_seconds"] = 30
     client = TestClient(create_app(
@@ -444,6 +453,7 @@ def test_theme_replaces_templates_and_serves_its_files(raw, status):
 def test_theme_keeps_the_live_screens_and_the_notice(raw, status):
     status.set_extra_keys(1)
     client = TestClient(create_app(parse_config(raw), status, theme_dir=EXAMPLE_THEME))
-    [event] = screen_events(client)
+    # The first event (the idle tip may change during the stream: a second one).
+    event = screen_events(client)[0]
     assert "Retirez-la, puis rebranchez-la" in event["main"]
     assert "Thème d'exemple" not in event["main"]  # <main> only

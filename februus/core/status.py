@@ -31,6 +31,8 @@ class SessionStatus:
     eta_seconds: int | None = None
     # Finding codes that give orange or red, shown on the result screen.
     problems: tuple[str, ...] = ()
+    # Names of the files too big to be checked (at most 5), for the screen.
+    big_files: tuple[str, ...] = ()
     # Antivirus signatures of the last session that knew them.
     signatures: str | None = None
     # Other keys plugged in and ignored (one key at a time). Not part of a

@@ -174,6 +174,10 @@ def _end(
         bytes_done=run.bytes_done,
         eta_seconds=0,
         problems=tuple(sorted({row.code for row in problems})),
+        big_files=tuple(
+            _printable(row.path) for row in problems
+            if row.code in BIG_FILE_CODES and row.path
+        )[:5],
     )
     entry = {
         "started": started,
@@ -230,6 +234,17 @@ def _read_source(
             roots.append((label, stack.enter_context(reader.open(source))))
         _scan(run, roots, clock, checker)
         checker.check()
+
+
+# Findings of a file too big (or too deep) to be checked: its name is shown.
+BIG_FILE_CODES = ("file.too_big", "scan.limit_exceeded")
+
+
+def _printable(name: str) -> str:
+    """A name from the key, safe to show: invisible characters (such as the
+    right-to-left mark that can turn "exe.mp4" around) become "?".
+    FR : un nom venant de la clé : caractères invisibles remplacés par « ? »."""
+    return "".join(c if c.isprintable() else "?" for c in name)
 
 
 class InventoryStopped(Exception):
