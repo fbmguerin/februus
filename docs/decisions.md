@@ -599,9 +599,10 @@ to keep STATUS short.
   question is in STATUS (known issues). `docs/TEST-PC-B.md` (EN/FR) rewritten
   around the two keys.
 - 2026-10-06 — Kiosk at boot (first try of a station without desktop: cage
-  failed with "Found 0 GPUs" and the screen stayed on the errors). Cause: at
-  boot `/dev/dri/card0` is first the generic driver simpledrm; the real one
-  (i915 here) replaces it a few seconds later and cage, started in between,
+  failed with "Found 0 GPUs" and the screen stayed on the errors). Probable
+  cause (not reproduced on f1, where i915 is ready before the kiosk in 9
+  boots): at boot `/dev/dri/card0` is first the generic driver simpledrm;
+  the real one replaces it a few seconds later and cage, started in between,
   lost its device; systemd then stopped restarting it (default limit: 5
   starts in 10 s). Fix, independent of the GPU: `deploy/kiosk/wait-for-gpu.sh`
   (`ExecStartPre`, installed in `/usr/local/lib/februus/`) runs `udevadm
