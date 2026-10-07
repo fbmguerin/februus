@@ -76,7 +76,7 @@ key. The former checks 4.1 to 4.3 are deleted; check 2.10 replaces them.
 
 | # | Check | Expected | Result |
 |---|---|---|---|
-| 6.1 | `deploy/install.sh --name f9` (as root, `su -`) | `hostname` and the screens show `f9`; `getent hosts f9` gives 127.0.1.1; `su -` and `hostname -f` do not warn "unable to resolve host" | |
+| 6.1 | `deploy/install.sh --name f9` (as root, `su -`) | `hostname` and the screens show `f9`; `getent hosts f9` gives 127.0.1.1; `su -` and `hostname -f` do not warn "unable to resolve host" | f1 2026-10-06: `--name f1` OK (hostname and screens show `f1`). |
 | 6.2 | `deploy/install.sh --name F9` (also `f_9`) | Refused before any change (exit code 2) | |
 | 6.3 | `deploy/install.sh` again (no option) | Name kept, "station name: f9" printed | |
 
@@ -89,18 +89,18 @@ section 7 (analyzers under their own account), removed with the service
 
 | # | Check | Expected | Result |
 |---|---|---|---|
-| 7.1 | `systemctl list-units 'februus*'` after the install | Only `februus.service` (the old scanner, web and analyzer units are gone) and it is active | OK: only `februus.service`, active; the old scanner and web units were removed by `install.sh` |
-| 7.2 | `ss -ltnp` | Only `127.0.0.1:8080` listens for Februus | OK: only `127.0.0.1:8080` (python3 of the service) |
+| 7.1 | `systemctl list-units 'februus*'` after the install | Only `februus.service` (the old scanner, web and analyzer units are gone) and it is active | OK: only `februus.service`, active; the old scanner and web units were removed by `install.sh` f1 2026-10-06: `februus.service` active (and `februus-kiosk.service` with `--kiosk`). |
+| 7.2 | `ss -ltnp` | Only `127.0.0.1:8080` listens for Februus | OK: only `127.0.0.1:8080` (python3 of the service) f1 2026-10-06: OK, only `127.0.0.1:8080`. |
 | 7.3 | Key with EICAR | Red `clamav.detected`: clamd accepts the descriptors given by the analyzer child process (risk of decision D14). If every file is `internal.error`: STOP, tell the user (fallback INSTREAM to discuss) | OK: EICAR alone and EICAR inside a zip give red `clamav.detected` (path `februus-test/eicar.com`, `februus-test/doc.zip`). No `internal.error`: clamd accepts the descriptors of the analyzer child, risk of D14 not seen. Also red with the right code: `archive.encrypted`, `pdf.encrypted`, `scan.limit_exceeded` |
 | 7.4 | Clean key | Green; during the analysis `pgrep -P $(systemctl show -p MainPID --value februus)` shows the analyzer child, and nothing after the session | OK: green; the analyzer child (`multiprocessing.spawn`) seen during the analysis, gone after. One Python helper (`resource_tracker`) stays as long as the service lives: normal, not an analyzer |
 | 7.5 | A file that hangs the analysis (`scan.file_timeout_seconds` set very low and a big file) | Red `scan.timeout`; the child process is gone (`pgrep -P`) | OK: 700 MB random file and `file_timeout_seconds = 1` (put back to 120 after): red `scan.timeout` on `februus-test/big.bin`, no analyzer child left, nothing mounted |
 | 7.6 | Key removed during the analysis | Red "removed"; no child process left | OK (key pulled by the user during an analysis, 10 files): red `device.removed`, `removed: true` in the key log, nothing mounted, no child left. The journal gets a traceback (`udisksctl unmount failed: Error looking up object`) from the unmount of the vanished key: noisy, verdict right |
 | 7.7 | `kill -9` the main process during an analysis | systemd restarts it; no child process left; a key mounted at the time of the kill gives RED ("already mounted"), a key not yet mounted is analyzed again | OK, with a different outcome than expected: systemd restarted the service (NRestarts=1), no child left. The key was mounted when killed, so the new session is RED (`internal.error`, "already mounted"), like 2.9: fail-closed, the key must be unplugged. Mount removed by hand afterwards; then green again. Expected text corrected |
-| 7.8 | `systemctl stop februus` with a green result on screen | The browser shows an error, never the old green | OK: with the service stopped the screen does not answer (connection refused), the old green is not shown |
+| 7.8 | `systemctl stop februus` with a green result on screen | The browser shows an error, never the old green | OK: with the service stopped the screen does not answer (connection refused), the old green is not shown f1 2026-10-06: `systemctl stop februus` hung 90 s (the live stream held uvicorn), fixed; then the watchdog shows "Station hors service" 10 to 12 s after the stop, and the screen comes back by itself at the start. |
 | 7.9 | After 7.3 to 7.6, as root: `cat /var/log/februus/keys.jsonl`, `ls -l /var/log/februus` | One line per key; no file name except the files with a warning; folder `februus:februus` 0750, file 0640 | OK: `/var/log/februus` is `februus:februus` 0750, `keys.jsonl` 0640; one line per key; the line of a problem has only the code (no file name for a clean key) |
 | 7.10 | `runuser -u februus -- februus stats` (as root) | Counts match the keys of this section | OK: `sudo -u februus februus stats` showed 4 sessions, 4 green, 20 files = the 4 lines of the log at that time |
 | 7.11 | `systemd-analyze security februus.service` | Exposure noted here | Exposure 2.9 OK. No `ProtectSystem`, `PrivateTmp`, `PrivateNetwork` etc. (wanted: clamd under AppArmor, loopback for the screens). `UMask` not set |
-| 7.12 | Reboot the PC | The service starts by itself, the screens answer on `127.0.0.1:8080` (T14) | OK (2026-10-05): after the reboot `februus.service` started by itself 8 s after boot (`enabled`, `NRestarts=0`), screens answer on `127.0.0.1:8080`, clamd and USBGuard active. Both keys were plugged in at boot: the first was analyzed (green), the second ignored ("still plugged in"). The kiosk (no desktop session) is still NOT tested: this PC has a desktop session (`francois`, tty2) |
+| 7.12 | Reboot the PC | The service starts by itself, the screens answer on `127.0.0.1:8080` (T14) | OK (2026-10-05): after the reboot `februus.service` started by itself 8 s after boot (`enabled`, `NRestarts=0`), screens answer on `127.0.0.1:8080`, clamd and USBGuard active. Both keys were plugged in at boot: the first was analyzed (green), the second ignored ("still plugged in"). The kiosk (no desktop session) is still NOT tested: this PC has a desktop session (`francois`, tty2) f1 2026-10-06: 9 reboots, the service starts by itself every time. |
 
 ## 8. Kiosk (cage + Firefox, `deploy/kiosk`)
 
@@ -114,14 +114,41 @@ no console 1, no desktop-free PC).
 | 8.1 | `cage -- firefox-esr --kiosk http://127.0.0.1:8080` | The station screen alone: no address bar, no tabs | OK (screenshot): only the Februus screen, with the picture |
 | 8.2 | Open `https://example.com` with the policies | Blocked page | OK: "Blocked Page - Your organization has blocked access to this page or website" |
 | 8.3 | Open `about:config` with the policies | Blocked | OK: same blocked page |
-| 8.4 | Sounds (green / orange / red / alarm) in the kiosk | Played without a click | Not done (needs a key result and a listening person) |
-| 8.5 | PC without desktop: boot to the kiosk (`februus-kiosk.service`, console 1, user `februus-kiosk`) | Screen at boot, no way out of the browser | Not done: needs a PC without desktop session (test B) |
+| 8.4 | Sounds (green / orange / red / alarm) in the kiosk | Played without a click | Not done (needs a key result and a listening person) f1 2026-10-06: OK after the fix (the ALSA mixer was muted): red sound heard on every red key. |
+| 8.5 | PC without desktop: boot to the kiosk (`februus-kiosk.service`, console 1, user `februus-kiosk`) | Screen at boot, no way out of the browser | Not done: needs a PC without desktop session (test B) f1 2026-10-06: OK, the kiosk starts by itself 2 to 3 s after boot (9 boots). Screen with the theme. |
 | 8.6 | Keyboard shortcuts (Ctrl+L, Ctrl+T, F11, Ctrl+Alt+F3...) | No way to open another page or a shell | Not done (needs a human at the keyboard, in the real kiosk) |
 | 8.7 | polkit: no desktop session means no user allowed to mount keys | Only `februus` mounts keys | Not done (needs test B) |
-| 8.8 | Kiosk at boot, 5 reboots: `journalctl -b -u februus-kiosk -o short-precise`, `journalctl -b -k \| grep -i -E 'drm\|simpledrm\|i915'` | The kiosk appears by itself each time; the journal shows `graphics driver ready` before cage, no "Found 0 GPUs" | |
-| 8.9 | In the kiosk: Ctrl+Alt+F2, then Ctrl+Alt+F1; also F3 to F6 | F2: a text console asking for a login, then back to the kiosk; F3 to F6: no login | |
-| 8.10 | `cat /proc/cmdline`; `systemctl is-enabled sleep.target suspend.target hibernate.target hybrid-sleep.target` | `consoleblank=0`; the four targets `masked` | |
-| 8.11 | Leave the station alone 15 minutes (kiosk, then text console) | The screen stays on | |
+| 8.8 | Kiosk at boot, 5 reboots: `journalctl -b -u februus-kiosk -o short-precise`, `journalctl -b -k \| grep -i -E 'drm\|simpledrm\|i915'` | The kiosk appears by itself each time; the journal shows `graphics driver ready` before cage, no "Found 0 GPUs" | f1 2026-10-06: 9 boots, `wait-for-gpu.sh`: "graphics driver ready after 0 s", never "Found 0 GPUs" (i915 is ready before the kiosk on this PC: the first-try error was not reproduced). Found instead: the screen froze on some boots (Firefox live stream broken by the network coming up): watchdog and Firefox network prefs, then 0 watchdog reload in 4 boots and one night. |
+| 8.9 | In the kiosk: Ctrl+Alt+F2, then Ctrl+Alt+F1; also F3 to F6 | F2: a text console asking for a login, then back to the kiosk; F3 to F6: no login | f1 2026-10-06: F2 login OK, F1 back OK. Before the logind drop-in F1 to F6 all worked; after it, F3 to F6 empty. A kiosk restarted while F2 was shown hung (cage "Timeout waiting session to become active"): fixed with `chvt 1`, checked (`chvt 2; systemctl restart februus-kiosk`: the kiosk comes back by itself). |
+| 8.10 | `cat /proc/cmdline`; `systemctl is-enabled sleep.target suspend.target hibernate.target hybrid-sleep.target` | `consoleblank=0`; the four targets `masked` | f1 2026-10-07: `consoleblank=0` (from `/etc/default/grub.d/februus.cfg`), the four targets `masked`. |
+| 8.11 | Leave the station alone 15 minutes (kiosk, then text console) | The screen stays on | f1: not checked explicitly (the kiosk stayed on all night; the screen was on in the morning, as told by the user, not timed). |
+
+| 8.12 | Kiosk browser network: `ss -tanpe \| grep "uid:$(id -u februus-kiosk) "` | Only 127.0.0.1 | f1 2026-10-07: KO first (5 to 8 connections to Mozilla services; the limit put in the unit did not apply, Firefox runs in a logind session scope), OK after the limit on `user-<uid>.slice`: 0 connection and 0 attempt in 30 s |
+| 8.13 | After an update of the theme: the kiosk shows the new style | New style without clearing anything by hand | f1 2026-10-06: KO first (Firefox kept the old CSS from its cache), OK after `Cache-Control: no-cache` (reproduced and checked with headless Firefox) |
+
+### f1, 2026-10-06 and 07 (development station)
+
+Lenovo ThinkCentre M710q, Intel Core i3-6100T, Intel HD Graphics 530
+(i915), 16 GB RAM, NVMe disk; screen 3440x1440 on DisplayPort; Debian 13
+netinst minimal (SSH server + standard utilities), no sudo; Februus from the
+branch `fix/f1-first-install`, installed with `--name f1 --usbguard --kiosk`
+and the theme of the Préfecture de la Moselle. ClamAV 1.4.3 (freshclam says
+1.4.6 is recommended: Debian version).
+
+Keys: SanDisk 3.2Gen1 32 GB and another key, both with a Debian installer
+(red `device.bootable` in 3.2 to 3.9 s, sound heard); Kingston DataTraveler
+3.0 16 GB: USB 3 errors (`device descriptor read/8, error -110`), the disk
+appears after 56 to 60 s or never, I/O errors: a hardware problem of this
+key (or port), Februus gives red. No ordinary (green) key was plugged in:
+mounting was not measured on f1.
+
+Time from plug to verdict (journal, 20 plugs, median): USB enumeration and
+USBGuard 0.02 s; disk ready 1.08 s; Februus sees the key 2.05 s later
+(`scanner.settle_seconds = 2`); inspectors and verdict 0.01 s (bootable keys
+are refused before mounting); screen reloaded 0.28 s later. Total 3.55 s.
+ClamAV measured apart (`februus scan` on a folder, files never scanned):
+about 9 ms per small file and 18 MB/s for one big file; Februus adds about
+5 % to clamd alone. The full report is in the pull request of the branch.
 
 ## 9. Second mini PC (test B)
 
