@@ -66,7 +66,7 @@ et ceux d'USBGuard.
 | deux partitions saines | `... two-partitions` | **orange** `device.multi_partition` (2.4) |
 | deux partitions, EICAR sur la seconde | `... two-partitions-eicar` | **rouge**, chemin `sdb2/...` |
 | fichier de 900 Mo | `... big` | analyse longue, temps restant, test de retrait (3.1, 3.2) |
-| fichier de 1,1 Go | `... toobig` | **rouge** `scan.limit_exceeded` (environ 12 s) |
+| fichier de 1,1 Go | `... toobig` | **rouge** `file.too_big` tout de suite (quelques secondes, rien n'est lu) |
 | vraie ISO amorçable | `... iso /root/debian-13.7.0-amd64-netinst.iso` | **rouge** `device.bootable`, jamais montée (2.5) |
 
 Pour l'ISO : `curl -fL -o /root/debian-13.7.0-amd64-netinst.iso

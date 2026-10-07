@@ -50,7 +50,7 @@ EICAR generated on a key (`tests/samples.py`).
 | # | Check | Expected | Result |
 |---|---|---|---|
 | 3.1 | Remove the key during the inventory | Red "removed", alarm, idle after 30 s | KO then OK after fix: red but `internal.error` (read error seen before the removal event) and state `result`. Fix: now `device.removed`, state `aborted`, idle after 30 s. Alarm (sound) not checked |
-| 3.2 | Remove during the analysis of a big file (> 1 GB) | Red within ~1 s, worker stopped (`ps`), nothing left mounted | OK: red in 0.02 s, worker stopped, nothing mounted (900 MB file). Found here: clamd answers `OK` for a file read only in part -> fixed, see below |
+| 3.2 | Remove during the analysis of a big file (900 MB, kit `big`; above `scan.max_file_mb` a file is red at once, never analyzed) | Red within ~1 s, worker stopped (`ps`), nothing left mounted | OK: red in 0.02 s, worker stopped, nothing mounted (900 MB file). Found here: clamd answers `OK` for a file read only in part -> fixed, see below |
 | 3.3 | (removal during the witness writing) | Removed on 2026-10-04 (D16): no witness file any more, nothing is written on the key | — |
 | 3.4 | Remove after the result | Idle screen | OK: session closed, idle screen (web UI checked with curl) |
 | 3.5 | Reinsert the same key at once | A new session (never the old result) | OK: a new session each time |

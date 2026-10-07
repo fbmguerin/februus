@@ -709,3 +709,18 @@ to keep STATUS short.
     and Firefox into a logind session scope (`user-103.slice/session-N.scope`),
     outside the service; checked on f1 with `ss -tnpe` (connections of uid
     103 still open).
+- 2026-10-07 — Files too big for the antivirus: RED, at once (user). Seen on
+  f1: a Windows installer key (Rufus, `install.wim` of several GB) was
+  analyzed for 7 minutes, then red: Februus first reads every file (fail-open
+  fix of 2026-10-02) and clamd then refuses a file above `MaxFileSize`.
+  Orange was asked, then refused after explanation: inflating a malware
+  beyond the antivirus size limit (MITRE ATT&CK T1027.001, binary padding)
+  is a known trick, and orange would let it through; raising the limit does
+  not help (clamd cannot go above 4 GB, and a 4 GB file takes minutes). Now
+  the inventory (which already has the sizes) gives `file.too_big` (red,
+  message "Un fichier est trop gros pour être vérifié (vidéo, sauvegarde,
+  image disque...)", file name in the key log) for every file above
+  `scan.max_file_mb`, and nothing is read nor analyzed. New REQUIRED setting
+  `scan.max_file_mb = 1000`, equal to `MaxFileSize` of
+  `deploy/clamav/clamd-februus.conf` (a unit test checks it); new rule
+  `"file.too_big" = "red"`.

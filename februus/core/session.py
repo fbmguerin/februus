@@ -319,6 +319,20 @@ def _scan(
             )
         files += [(PurePath(label) / relative, size) for relative, size in found]
         paths += [root / relative for relative, _ in found]
+    # A file bigger than the antivirus limit cannot be checked: red at once,
+    # before reading anything (reading a 5 GB file of a key takes minutes,
+    # and the verdict could only be red).
+    # FR : fichier trop gros pour l'antivirus : ROUGE tout de suite, sans
+    # rien lire (rouge et non orange : gonfler un virus est une ruse connue).
+    max_bytes = scan.max_file_mb * 1024 * 1024
+    too_big = [(name, size) for name, size in files if size > max_bytes]
+    if too_big:
+        for name, size in too_big:
+            run.add(
+                keylog.safe_text(name), ENGINE, "file.too_big",
+                f"{size // (1024 * 1024)} MB > {scan.max_file_mb} MB",
+            )
+        return
     bytes_total = sum(size for _, size in files)
     run.files_total = run.unfinished = len(files)
     run.status.update(files_total=len(files), bytes_total=bytes_total)

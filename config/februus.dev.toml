@@ -28,6 +28,10 @@ progress_update_seconds = 1
 cancel_check_ms = 200
 # More files and folders than this on a key: "scan.limit_exceeded" (red).
 max_entries = 200000
+# A file bigger than this (MB) gives "file.too_big" (red) at once, before
+# anything is read: clamd does not scan it anyway. Same value as MaxFileSize
+# in deploy/clamav/clamd-februus.conf.
+max_file_mb = 1000
 # Maximum wait for one mount or unmount of the key (udisks2).
 mount_timeout_seconds = 30
 
@@ -47,6 +51,7 @@ poll_interval_ms = 500
 "archive.encrypted"       = "red"
 "pdf.encrypted"           = "red"
 "scan.limit_exceeded"     = "red"
+"file.too_big"            = "red"
 "scan.timeout"            = "red"
 "device.refused"          = "red"
 "device.bootable"         = "red"

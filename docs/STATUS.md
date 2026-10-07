@@ -69,8 +69,6 @@ not seen. Then T15.
   préfecture / SIDSIC in `AGENTS.md`, `PLAN.md` and this file: keep or
   generalise. The author of the public commits is "François Guerin"
   (GitHub noreply address).
-- Files bigger than the clamd limits (videos > 1 GB): red today; orange with a
-  "file not analyzed" message?
 - `device.boot_flag`: red or orange (how many real keys have the MBR flag?
   check 5.3 with 10 ordinary keys of the préfecture).
 - External hard disks on a USB adapter: allowed like keys. Accept or refuse?
@@ -119,7 +117,9 @@ and merged.
   screen (only the ones plugged in later).
 - No self-test at scanner start and no "station degraded" screen for old
   signatures or clamd down.
-- clamd size limits (MaxFileSize 1000M, MaxScanSize 2000M): bigger = red.
+- A file bigger than `scan.max_file_mb` (1000, = clamd MaxFileSize) is red
+  `file.too_big` at once (user, 2026-10-07: red, not orange; a Windows
+  installer key is red). An update needs `max_file_mb = 1000` in `[scan]`.
 - A new required config key makes an old `/etc/februus/februus.toml` invalid
   after an update (wanted: no hidden default).
 - polkit lets an active desktop user mount keys: a station must have no desktop

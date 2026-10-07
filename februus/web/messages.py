@@ -20,6 +20,7 @@ FINDING_MESSAGES = {
     "archive.encrypted": "Une archive est protégée par un mot de passe : elle ne peut pas être vérifiée.",
     "pdf.encrypted": "Un PDF est protégé par un mot de passe : il ne peut pas être vérifié.",
     "scan.limit_exceeded": "Un fichier est trop gros ou trop complexe pour être vérifié.",
+    "file.too_big": "Un fichier est trop gros pour être vérifié (vidéo, sauvegarde, image disque...).",
     "scan.timeout": "L'analyse a pris trop de temps et a été arrêtée.",
     "device.refused": "Cet appareil n'est pas accepté par la station.",
     "device.bootable": "Cette clé peut démarrer un ordinateur : elle est refusée.",

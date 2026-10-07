@@ -278,3 +278,12 @@ def test_station_name_must_be_short_and_printable(data, name):
 def test_long_french_station_name_is_accepted(data):
     data["station"]["name"] = "Préfecture de la Moselle - accueil, bâtiment A"
     assert parse_config(data).station.name.startswith("Préfecture")
+
+
+def test_max_file_mb_matches_the_clamd_limit():
+    """Februus stops a file before clamd would: the two limits are equal."""
+    root = Path(__file__).resolve().parents[2]
+    clamd = (root / "deploy" / "clamav" / "clamd-februus.conf").read_text()
+    with (root / "config" / "februus.example.toml").open("rb") as file:
+        max_file_mb = tomllib.load(file)["scan"]["max_file_mb"]
+    assert f"\nMaxFileSize {max_file_mb}M\n" in clamd
