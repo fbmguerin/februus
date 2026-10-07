@@ -248,6 +248,12 @@ if [ "$KIOSK" = yes ]; then
   install -d -m 755 /usr/local/lib/februus
   install -m 755 "$REPO/deploy/kiosk/wait-for-gpu.sh" /usr/local/lib/februus/wait-for-gpu.sh
   install -m 644 "$REPO/deploy/kiosk/februus-kiosk.service" /etc/systemd/system/februus-kiosk.service
+  # Network limit of the browser: on the slice of the account (the session
+  # of cage and Firefox is outside the service).
+  # FR : limite réseau sur la « slice » du compte du kiosque.
+  slice_dir="/etc/systemd/system/user-$(id -u februus-kiosk).slice.d"
+  install -d -m 755 "$slice_dir"
+  install -m 644 "$REPO/deploy/kiosk/kiosk-user-slice.conf" "$slice_dir/50-februus.conf"
   # Forget the files cached by the kiosk browser (style sheets of an older
   # version or theme). Only the cache: the profile is kept.
   rm -rf /var/lib/februus-kiosk/.cache/mozilla

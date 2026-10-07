@@ -66,10 +66,12 @@ def test_kiosk_unit_allows_console_switch_and_never_gives_up():
 
 
 def test_kiosk_browser_reaches_this_machine_only():
-    text = UNIT.read_text()
+    # On the user slice: cage and Firefox run in a logind session scope.
+    text = (REPO_ROOT / "deploy" / "kiosk" / "kiosk-user-slice.conf").read_text()
+    assert "[Slice]" in text
     assert "IPAddressDeny=any" in text
     assert "IPAddressAllow=localhost" in text
-    assert "MOZ_CRASHREPORTER_DISABLE=1" in text
+    assert "MOZ_CRASHREPORTER_DISABLE=1" in UNIT.read_text()
 
 
 def test_one_rescue_console_only():

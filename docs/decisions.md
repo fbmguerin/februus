@@ -701,5 +701,10 @@ to keep STATUS short.
   - The kiosk Firefox had 5 connections to the Internet (Mozilla push and
     remote settings, on Google Cloud and Fastly), and its crash reporter ran
     after crashes at stop (crash reports can hold the page: verdicts). Rule 5
-    (no network except freshclam): `IPAddressDeny=any`,
-    `IPAddressAllow=localhost` and `MOZ_CRASHREPORTER_DISABLE=1` in the unit.
+    (no network except freshclam): `MOZ_CRASHREPORTER_DISABLE=1` in the
+    unit, and `IPAddressDeny=any` + `IPAddressAllow=localhost` on the slice of
+    the account (`/etc/systemd/system/user-<uid>.slice.d/50-februus.conf`).
+    First put in the unit, the limit did not apply: `PAMName=login` moves cage
+    and Firefox into a logind session scope (`user-103.slice/session-N.scope`),
+    outside the service; checked on f1 with `ss -tnpe` (connections of uid
+    103 still open).

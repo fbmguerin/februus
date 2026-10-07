@@ -52,11 +52,12 @@ RestartSec=3
 TimeoutStopSec=10
 
 # --- Network: the browser only shows the screens of this machine. Without
-# this, Firefox talked to Mozilla services (push, remote settings) and could
-# send crash reports holding the page (verdicts) (f1).
-# FR : le navigateur ne parle qu'à 127.0.0.1 ; pas de rapports de plantage.
-IPAddressDeny=any
-IPAddressAllow=localhost
+# it, Firefox talked to Mozilla services (push, remote settings) and could
+# send crash reports holding the page (verdicts) (f1). The network limit is
+# on the user slice (deploy/kiosk/kiosk-user-slice.conf): PAMName=login puts
+# cage and Firefox in a session scope, where a limit set here does not apply.
+# FR : le navigateur ne parle qu'à 127.0.0.1 (limite posée sur la « slice »
+# du compte) ; pas de rapports de plantage.
 Environment=MOZ_CRASHREPORTER_DISABLE=1
 
 [Install]
