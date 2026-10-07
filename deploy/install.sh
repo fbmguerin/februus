@@ -12,7 +12,7 @@
 #   --usbguard   also install the USBGuard rules. The devices plugged in
 #                NOW (keyboard, mouse...) become the only non-storage
 #                devices allowed: unplug everything else first.
-#   --kiosk      also install the kiosk (cage + Firefox). NOT TESTED YET.
+#   --kiosk      also install the kiosk (cage + Firefox). Checked on f1.
 #   --theme DIR  copy the theme folder DIR (templates/ and static/) to
 #                /etc/februus/theme: another look for the screens. See
 #                deploy/theme-example/.
@@ -241,7 +241,7 @@ systemctl enable februus.service
 systemctl restart februus.service
 
 if [ "$KIOSK" = yes ]; then
-  step "10. Kiosk (NOT TESTED YET)"
+  step "10. Kiosk"
   id februus-kiosk >/dev/null 2>&1 || adduser --system --group --home /var/lib/februus-kiosk februus-kiosk
   install -d -m 755 /usr/lib/firefox-esr/distribution
   install -m 644 "$REPO/deploy/kiosk/policies.json" /usr/lib/firefox-esr/distribution/policies.json

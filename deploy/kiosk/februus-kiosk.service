@@ -1,6 +1,6 @@
 # Februus kiosk: one full-screen Firefox on the web UI, nothing else.
 # Tested in a window of a desktop (docs/hardware-validation.md, section 8,
-# 2026-10-05). At boot: being checked on f1 (section 8).
+# 2026-10-05). At boot: checked on f1 (section 8, 2026-10-06).
 # Installed by "deploy/install.sh --kiosk".
 # FR : écran de la station : Firefox plein écran dans cage, sans bureau.
 
