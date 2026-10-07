@@ -18,7 +18,9 @@ path = "/var/log/februus/keys.jsonl"
 
 [scan]
 # Maximum time to analyze one file. Exceeded: finding "scan.timeout" (red).
-file_timeout_seconds = 120
+# A 3 GB file takes about 3 minutes on a small mini PC (f1: 18 MB/s). Not
+# above MaxScanTime of deploy/clamav/clamd-februus.conf.
+file_timeout_seconds = 600
 # Maximum time for a whole session. Exceeded: finding "scan.timeout" (red).
 session_timeout_minutes = 240
 # If the estimated time left is longer, show "Do not remove the key,
@@ -33,7 +35,7 @@ max_entries = 200000
 # A file bigger than this (MB) gives "file.too_big" (red) at once, before
 # anything is read: clamd does not scan it anyway. Same value as MaxFileSize
 # in deploy/clamav/clamd-februus.conf.
-max_file_mb = 1000
+max_file_mb = 3000
 # Maximum wait for one mount or unmount of the key (udisks2).
 mount_timeout_seconds = 30
 

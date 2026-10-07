@@ -287,3 +287,13 @@ def test_max_file_mb_matches_the_clamd_limit():
     with (root / "config" / "februus.example.toml").open("rb") as file:
         max_file_mb = tomllib.load(file)["scan"]["max_file_mb"]
     assert f"\nMaxFileSize {max_file_mb}M\n" in clamd
+
+
+def test_file_timeout_fits_in_the_clamd_scan_time():
+    """clamd must not stop a file before Februus would (a clearer finding)."""
+    root = Path(__file__).resolve().parents[2]
+    clamd = (root / "deploy" / "clamav" / "clamd-februus.conf").read_text()
+    with (root / "config" / "februus.example.toml").open("rb") as file:
+        timeout = tomllib.load(file)["scan"]["file_timeout_seconds"]
+    scan_time_ms = int(clamd.split("\nMaxScanTime ", 1)[1].split()[0])
+    assert scan_time_ms >= timeout * 1000

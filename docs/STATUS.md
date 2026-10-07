@@ -115,9 +115,11 @@ and merged.
   screen (only the ones plugged in later).
 - No self-test at scanner start and no "station degraded" screen for old
   signatures or clamd down.
-- A file bigger than `scan.max_file_mb` (1000, = clamd MaxFileSize) is red
-  `file.too_big` at once (user, 2026-10-07: red, not orange; a Windows
-  installer key is red). An update needs `max_file_mb = 1000` in `[scan]`.
+- A file bigger than `scan.max_file_mb` (3000, = clamd MaxFileSize) is red
+  `file.too_big` at once, its name on screen (user, 2026-10-07: red, not
+  orange; a Windows installer key is red). An update needs `max_file_mb =
+  3000` and `file_timeout_seconds = 600` in `[scan]`. 3 GB to check on f1
+  with a real key (time, memory of clamd).
 - A new required config key makes an old `/etc/februus/februus.toml` invalid
   after an update (wanted: no hidden default).
 - polkit lets an active desktop user mount keys: a station must have no desktop

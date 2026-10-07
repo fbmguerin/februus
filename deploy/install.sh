@@ -142,6 +142,13 @@ if [ -n "$THEME" ]; then
 fi
 
 step "5. ClamAV settings"
+# Folder for the files that clamd extracts from archives (see
+# clamd-februus.conf), allowed by its AppArmor profile.
+install -d -o clamav -g clamav -m 700 /var/lib/februus-clamd
+install -m 644 "$REPO/deploy/clamav/apparmor-local-clamd" /etc/apparmor.d/local/usr.sbin.clamd
+if [ -e /sys/module/apparmor/parameters/enabled ] && command -v apparmor_parser >/dev/null; then
+  apparmor_parser -r /etc/apparmor.d/usr.sbin.clamd
+fi
 "$REPO/deploy/clamav/apply-clamd-settings.sh"
 systemctl enable --now clamav-freshclam.service
 # clamd refuses to start without signatures (first install: freshclam is

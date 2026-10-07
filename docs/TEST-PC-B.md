@@ -59,7 +59,7 @@ with two keys at once and for the USBGuard tests.
 | two clean partitions | `... two-partitions` | **orange** `device.multi_partition` (2.4) |
 | two partitions, EICAR on the second | `... two-partitions-eicar` | **red**, path `sdb2/...` |
 | 900 MB file | `... big` | long analysis, ETA, removal test (3.1, 3.2) |
-| 1.1 GB file | `... toobig` | **red** `file.too_big` at once (a few seconds, nothing read) |
+| 1.1 GB file | `... toobig` | **green** since the 3 GB limit (about 1 minute); a file above 3 GB is red `file.too_big` at once |
 | real bootable ISO | `... iso /root/debian-13.7.0-amd64-netinst.iso` | **red** `device.bootable`, never mounted (2.5) |
 
 For the ISO: `curl -fL -o /root/debian-13.7.0-amd64-netinst.iso
