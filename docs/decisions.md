@@ -724,7 +724,8 @@ to keep STATUS short.
   `scan.max_file_mb = 1000`, equal to `MaxFileSize` of
   `deploy/clamav/clamd-februus.conf` (a unit test checks it); new rule
   `"file.too_big" = "red"`.
-- 2026-10-07 — Antivirus limit 3 GB instead of 1 GB (user: videos and
+- 2026-10-07 — Antivirus limit 3 GB instead of 1 GB (then 2 GB, see the end
+  of this entry) (user: videos and
   backups up to 3 GB can be checked; the station has 16 GB of RAM, but time
   and temporary disk space are the real limits). `scan.max_file_mb = 3000`
   and clamd `MaxFileSize 3000M` (a test keeps them equal), `MaxScanSize
@@ -740,3 +741,8 @@ to keep STATUS short.
   (`install.wim` of 4 to 6 GB). The result screen now lists up to 5 names of
   files too big (invisible characters replaced by "?"), with a plain
   warning: it can be normal, but it is also a trick of viruses.
+  Correction the same day: clamd 1.4.3 caps `MaxFileSize` at 2 GB without
+  error ("File size limit set to 2147483645 bytes" in its journal, f1): the
+  limit is 2000 MB on both sides (`max_file_mb = 2000`, `MaxFileSize
+  2000M`); with 3000, a file of 2 to 3 GB would be read in full, then
+  refused by clamd (red, but slow).
