@@ -1,6 +1,6 @@
 #!/bin/bash
 # Install or update Februus on a Debian 13 station. Run as root, from a
-# copy of the repository:   sudo deploy/install.sh [options]
+# copy of the repository (su -):   deploy/install.sh [options]
 #
 # The script can be run again after each update of the code: every step
 # replaces what the previous run installed. It never touches
@@ -12,7 +12,7 @@
 #   --usbguard   also install the USBGuard rules. The devices plugged in
 #                NOW (keyboard, mouse...) become the only non-storage
 #                devices allowed: unplug everything else first.
-#   --kiosk      also install the kiosk (cage + Firefox). NOT TESTED YET.
+#   --kiosk      also install the kiosk (cage + Firefox). Checked on f1.
 #   --theme DIR  copy the theme folder DIR (templates/ and static/) to
 #                /etc/februus/theme: another look for the screens. See
 #                deploy/theme-example/.
@@ -47,7 +47,7 @@ if [ -n "$THEME" ] && ! { [ -d "$THEME/templates" ] || [ -d "$THEME/static" ]; }
   echo "invalid theme: '$THEME' has no templates/ or static/ folder" >&2
   exit 2
 fi
-[ "$(id -u)" = 0 ] || { echo "run as root: sudo $0" >&2; exit 1; }
+[ "$(id -u)" = 0 ] || { echo "run as root (su -): $0" >&2; exit 1; }
 REPO="$(cd "$(dirname "$0")/.." && pwd)"
 PATH="$PATH:/usr/sbin:/sbin"
 step() { echo; echo "== $*"; }
@@ -70,7 +70,7 @@ fi
 step "1. Debian packages"
 PACKAGES="python3 python3-fastapi python3-uvicorn python3-jinja2
   python3-pyudev clamav-daemon clamav-freshclam udisks2 polkitd usbguard"
-[ "$KIOSK" = yes ] && PACKAGES="$PACKAGES cage firefox-esr"
+[ "$KIOSK" = yes ] && PACKAGES="$PACKAGES cage firefox-esr alsa-utils kbd"
 if [ "$APT" = yes ]; then
   # shellcheck disable=SC2086
   DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends $PACKAGES
@@ -142,6 +142,13 @@ if [ -n "$THEME" ]; then
 fi
 
 step "5. ClamAV settings"
+# Folder for the files that clamd extracts from archives (see
+# clamd-februus.conf), allowed by its AppArmor profile.
+install -d -o clamav -g clamav -m 700 /var/lib/februus-clamd
+install -m 644 "$REPO/deploy/clamav/apparmor-local-clamd" /etc/apparmor.d/local/usr.sbin.clamd
+if [ -e /sys/module/apparmor/parameters/enabled ] && command -v apparmor_parser >/dev/null; then
+  apparmor_parser -r /etc/apparmor.d/usr.sbin.clamd
+fi
 "$REPO/deploy/clamav/apply-clamd-settings.sh"
 systemctl enable --now clamav-freshclam.service
 # clamd refuses to start without signatures (first install: freshclam is
@@ -164,6 +171,24 @@ systemctl restart udisks2.service
 step "7. Key log folder"
 install -m 644 "$REPO/deploy/systemd/februus.tmpfiles" /etc/tmpfiles.d/februus.conf
 systemd-tmpfiles --create /etc/tmpfiles.d/februus.conf
+
+step "7b. Never sleep, screen always on"
+# A station waits for keys all day: no suspend, and the text console (what
+# the screen shows when the kiosk is not running) never goes blank. A file
+# in grub.d, so /etc/default/grub stays as Debian wrote it.
+# FR : jamais de mise en veille ; la console ne s'éteint jamais.
+systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
+install -d -m 755 /etc/default/grub.d
+cat > /etc/default/grub.d/februus.cfg <<'GRUB'
+# Written by Februus (deploy/install.sh): the console never goes blank.
+GRUB_CMDLINE_LINUX_DEFAULT="$GRUB_CMDLINE_LINUX_DEFAULT consoleblank=0"
+GRUB
+if command -v update-grub >/dev/null; then
+  update-grub
+  echo "consoleblank=0 is active after the next reboot"
+else
+  echo "update-grub not found: add consoleblank=0 to the kernel command line by hand" >&2
+fi
 
 if [ "$USBGUARD" = yes ]; then
   step "8. USBGuard rules"
@@ -223,13 +248,40 @@ systemctl enable februus.service
 systemctl restart februus.service
 
 if [ "$KIOSK" = yes ]; then
-  step "10. Kiosk (NOT TESTED YET)"
+  step "10. Kiosk"
   id februus-kiosk >/dev/null 2>&1 || adduser --system --group --home /var/lib/februus-kiosk februus-kiosk
   install -d -m 755 /usr/lib/firefox-esr/distribution
   install -m 644 "$REPO/deploy/kiosk/policies.json" /usr/lib/firefox-esr/distribution/policies.json
+  install -d -m 755 /usr/local/lib/februus
+  install -m 755 "$REPO/deploy/kiosk/wait-for-gpu.sh" /usr/local/lib/februus/wait-for-gpu.sh
   install -m 644 "$REPO/deploy/kiosk/februus-kiosk.service" /etc/systemd/system/februus-kiosk.service
+  # Network limit of the browser: on the slice of the account (the session
+  # of cage and Firefox is outside the service).
+  # FR : limite réseau sur la « slice » du compte du kiosque.
+  slice_dir="/etc/systemd/system/user-$(id -u februus-kiosk).slice.d"
+  install -d -m 755 "$slice_dir"
+  install -m 644 "$REPO/deploy/kiosk/kiosk-user-slice.conf" "$slice_dir/50-februus.conf"
+  # Forget the files cached by the kiosk browser (style sheets of an older
+  # version or theme). Only the cache: the profile is kept.
+  rm -rf /var/lib/februus-kiosk/.cache/mozilla
+  # One rescue text console (tty2), none on tty3 to tty6 (next boot).
+  install -d -m 755 /etc/systemd/logind.conf.d
+  install -m 644 "$REPO/deploy/logind/februus.conf" /etc/systemd/logind.conf.d/februus.conf
   systemctl daemon-reload
   systemctl enable februus-kiosk.service
+  # Sounds of the screens: the sound card starts muted on a minimal Debian.
+  # Every output at full volume, saved (alsa-utils restores it at boot).
+  # FR : la carte son démarre muette : tout au maximum, réglage conservé.
+  if command -v amixer >/dev/null && [ -e /proc/asound/cards ] \
+      && ! grep -q 'no soundcards' /proc/asound/cards; then
+    amixer scontrols | sed -n "s/^Simple mixer control '\([^']*\)',.*/\1/p" |
+      while IFS= read -r control; do
+        amixer -q sset "$control" 100% unmute 2>/dev/null || true
+      done
+    alsactl store && echo "sound: every output at full volume"
+  else
+    echo "no sound card found: the screens will be silent"
+  fi
   echo "kiosk installed; it starts at the next boot (graphical target)"
 fi
 

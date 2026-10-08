@@ -1,17 +1,19 @@
 # Februus kiosk: one full-screen Firefox on the web UI, nothing else.
-# Tested only in a window of a desktop (docs/hardware-validation.md, section
-# 8, 2026-10-05). NOT tested at boot: screen, sounds, no way out of the
-# browser, on a PC without a desktop session.
+# Tested in a window of a desktop (docs/hardware-validation.md, section 8,
+# 2026-10-05). At boot: checked on f1 (section 8, 2026-10-06).
 # Installed by "deploy/install.sh --kiosk".
 # FR : écran de la station : Firefox plein écran dans cage, sans bureau.
-# TESTÉ SEULEMENT DANS UNE FENÊTRE, PAS AU DÉMARRAGE.
 
 [Unit]
 Description=Februus kiosk (cage + Firefox)
-After=systemd-user-sessions.service februus.service
+After=systemd-user-sessions.service systemd-logind.service februus.service
+After=systemd-udev-trigger.service
 Wants=februus.service
 Conflicts=getty@tty1.service
 After=getty@tty1.service
+# Never give up: a kiosk that stopped trying leaves a dead screen.
+# FR : ne jamais abandonner (sinon l'écran reste figé sur une erreur).
+StartLimitIntervalSec=0
 
 [Service]
 User=februus-kiosk
@@ -23,11 +25,40 @@ TTYReset=yes
 TTYVHangup=yes
 TTYVTDisallocate=yes
 StandardInput=tty-fail
+# Messages of cage, Firefox and wait-for-gpu.sh go to the journal
+# (journalctl -u februus-kiosk), not on the screen of the agents.
+# FR : les messages vont dans le journal, pas sur l'écran.
+StandardOutput=journal
+StandardError=journal
 UtmpIdentifier=tty1
 UtmpMode=user
-ExecStart=/usr/bin/cage -- /usr/bin/firefox-esr --kiosk http://127.0.0.1:8080
+# Console 1 in front first (as root, "+"): started while another console is
+# shown (an administrator on Ctrl+Alt+F2), cage waits for its session,
+# gives up after 10 s and then hangs without showing anything (f1).
+# FR : console 1 au premier plan d'abord, sinon cage se bloque.
+ExecStartPre=+/usr/bin/chvt 1
+# At boot the real graphics driver replaces the generic one (simpledrm) a
+# few seconds after the console exists: wait for it (at most 30 s).
+# FR : attendre le vrai pilote graphique avant de lancer cage.
+ExecStartPre=/usr/local/lib/februus/wait-for-gpu.sh 30
+# -s: Ctrl+Alt+F2 opens a text console (login with a password), the way
+# out for an administrator (docs/INSTALL.md, troubleshooting). Only tty2
+# has a login (deploy/logind/februus.conf).
+# FR : -s permet de changer de console (Ctrl+Alt+F2) pour l'administrateur.
+ExecStart=/usr/bin/cage -s -- /usr/bin/firefox-esr --kiosk http://127.0.0.1:8080
 Restart=always
-RestartSec=2
+RestartSec=3
+# A hung cage ignores SIGTERM: kill it after 10 s, not 90.
+TimeoutStopSec=10
+
+# --- Network: the browser only shows the screens of this machine. Without
+# it, Firefox talked to Mozilla services (push, remote settings) and could
+# send crash reports holding the page (verdicts) (f1). The network limit is
+# on the user slice (deploy/kiosk/kiosk-user-slice.conf): PAMName=login puts
+# cage and Firefox in a session scope, where a limit set here does not apply.
+# FR : le navigateur ne parle qu'à 127.0.0.1 (limite posée sur la « slice »
+# du compte) ; pas de rapports de plantage.
+Environment=MOZ_CRASHREPORTER_DISABLE=1
 
 [Install]
 WantedBy=graphical.target

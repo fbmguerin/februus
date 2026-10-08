@@ -598,3 +598,151 @@ to keep STATUS short.
   partition); the inspector is NOT changed (fail-closed, a security rule), the
   question is in STATUS (known issues). `docs/TEST-PC-B.md` (EN/FR) rewritten
   around the two keys.
+- 2026-10-06 — Kiosk at boot (first try of a station without desktop: cage
+  failed with "Found 0 GPUs" and the screen stayed on the errors). Probable
+  cause (not reproduced on f1, where i915 is ready before the kiosk in 9
+  boots): at boot `/dev/dri/card0` is first the generic driver simpledrm;
+  the real one replaces it a few seconds later and cage, started in between,
+  lost its device; systemd then stopped restarting it (default limit: 5
+  starts in 10 s). Fix, independent of the GPU: `deploy/kiosk/wait-for-gpu.sh`
+  (`ExecStartPre`, installed in `/usr/local/lib/februus/`) runs `udevadm
+  settle`, then waits at most 30 s for a DRM card whose driver is not a
+  generic one (simpledrm and its kin); after 30 s it goes on with the generic
+  one (PC or VM without a real driver), and fails only if there is no card at
+  all. `StartLimitIntervalSec=0`: the kiosk never gives up. The 30 s are an
+  argument in the unit, not a TOML setting: the kiosk is a deploy file that
+  does not read the config, and the value is not a business setting.
+  Not chosen: `systemd-udev-settle.service` (deprecated, and does not wait for
+  the driver itself), a fixed `sleep`, a dependency on a GPU-specific device
+  unit.
+- 2026-10-06 — cage runs with `-s` (user): Ctrl+Alt+F2 opens a text console.
+  Without it an administrator at the station was locked in the kiosk. The
+  console asks for a login and password, like SSH; the agents do not have
+  one. Documented in `docs/INSTALL.md` (troubleshooting).
+- 2026-10-06 — A station never sleeps and its screen never goes blank (first
+  try: the console went blank after a few minutes). `install.sh` always (not
+  only with `--kiosk`) masks `sleep`, `suspend`, `hibernate` and
+  `hybrid-sleep.target`, and writes `/etc/default/grub.d/februus.cfg`
+  (`consoleblank=0` added to `GRUB_CMDLINE_LINUX_DEFAULT`) then runs
+  `update-grub`: `/etc/default/grub` itself is left as Debian wrote it, so a
+  Debian update never conflicts with it. Fixed values (no TOML setting): a
+  station that sleeps is never wanted.
+- 2026-10-06 — No sudo on the stations (user): Debian is installed without
+  it, root is reached with `su -`. Scripts say "run as root (su -)",
+  `tools/station-report.sh` uses `runuser -u februus --` (util-linux, always
+  present), and every guide says "as root (`su -`)". `.devcontainer/` keeps
+  sudo (another environment). Old results in `docs/hardware-validation.md`
+  keep the commands that were really typed.
+- 2026-10-06 — Kiosk messages go to the journal (`StandardOutput=journal`,
+  `StandardError=journal`): before, cage and Firefox wrote on console 1, so
+  their errors stayed on the screen of the agents and were missing from
+  `journalctl -u februus-kiosk` (the messages of `wait-for-gpu.sh` too).
+- 2026-10-06 — Sounds at full volume (user, f1: no sound heard). On a minimal
+  Debian the ALSA mixer starts muted and nothing restores it. `install.sh
+  --kiosk` adds `alsa-utils`, sets every mixer control of the sound card to
+  100 % and unmuted, and saves it (`alsactl store`; `alsa-restore.service`
+  restores it at boot). Fixed value, not a TOML setting: deploy, not Februus.
+  The default output is the analog one (internal speaker or jack); sound
+  through the DisplayPort/HDMI screen is not set up.
+- 2026-10-06 — Live screen watchdog (found on f1: after some reboots the
+  kiosk screen stayed on "Insérez votre clé USB" while the keys were
+  analyzed and red; once the red came 5 minutes late, once never, and
+  Firefox had no connection to the service any more). The server was checked
+  apart (a change after 40 s of silence is sent at once). In every failed
+  boot Firefox opened the live stream while the network came up (cable,
+  router advertisement): Firefox reacts to network changes and its stream
+  froze or closed without reconnecting. Risk: an OLD verdict (green) could
+  stay on screen. Fix, whatever the cause:
+  - `/events` sends a sign of life (`event: alive`) three times per
+    `web.watchdog_seconds` (new required setting, 10 s) when the screen
+    does not change;
+  - `live.js` (now rendered by the server from `templates/live.js`, at the
+    same path `/static/live.js`, so themes need no change) hides the screen
+    behind "Station hors service" (the degraded template of the theme) and
+    stops the sounds when nothing came for that delay, then reloads
+    (`/?watchdog`, counted in the journal) only once `/` answers: a failed
+    reload would leave a browser error page without the script.
+  Also, Firefox ignores network changes (`policies.json`, locked:
+  `network.notify.changed`, `network.manage-offline-status`, connectivity
+  and captive portal services off): the station only talks to 127.0.0.1.
+  Not chosen: another browser now (Chromium has the same network logic;
+  Cog, a WebKit kiosk browser, is a lead in STATUS: no policy file, all the
+  kiosk checks to redo). An old `/etc/februus/februus.toml` must get
+  `watchdog_seconds` in `[web]` (install.sh stops and says so).
+- 2026-10-06 — `systemctl stop februus` waited 90 s then killed the service
+  (f1): uvicorn waits for the open connections, and the live stream of the
+  kiosk lasts up to `web.stream_seconds` (300 s). `create_app(stopping=...)`:
+  the streams end as soon as the server is asked to stop (`serve` and `demo`
+  pass `server.should_exit`). No new setting.
+- 2026-10-06 — One rescue console only (user, f1: with `cage -s` every
+  console F1 to F6 could be reached, five of them with a login prompt).
+  `deploy/logind/februus.conf` (installed with `--kiosk` in
+  `/etc/systemd/logind.conf.d/`): `NAutoVTs=2` (a login prompt is started
+  only on tty1 and tty2; tty1 belongs to the kiosk) and `ReserveVT=0` (no
+  console kept ready on tty6). Ctrl+Alt+F2 is the rescue console; F3 to F6
+  are empty. Read by logind at boot (no restart of logind by install.sh: it
+  would end the kiosk session).
+- 2026-10-06 — Every answer of the web UI says `Cache-Control: no-cache`
+  (f1: after the theme was updated, the kiosk kept showing the old style
+  sheet; at boot Firefox did not even ask for it). Without that header
+  Firefox keeps a file without asking for about 10 % of its age (a CSS
+  installed 2 hours before: 12 minutes). Reproduced with headless Firefox
+  and a 2-hour-old CSS: old style without the header, new style with it.
+  The browser now checks every file at each load (a "not modified" answer on
+  127.0.0.1 costs nothing). `install.sh --kiosk` also deletes the cache of the
+  kiosk browser (`/var/lib/februus-kiosk/.cache/mozilla`).
+- 2026-10-07 — Kiosk hardening after one night on f1:
+  - cage started while console 2 was shown (kiosk restarted during a test)
+    logged "Timeout waiting session to become active", "Unable to create the
+    wlroots backend", then hung: no Firefox, SIGTERM ignored, killed after
+    90 s; the screen stayed frozen. `ExecStartPre=+/usr/bin/chvt 1` (as root)
+    puts console 1 in front first; `TimeoutStopSec=10`. A kiosk restart
+    takes the screen back from an administrator on Ctrl+Alt+F2 (wanted for
+    a station). `kbd` (chvt) added to the kiosk packages.
+  - The kiosk Firefox had 5 connections to the Internet (Mozilla push and
+    remote settings, on Google Cloud and Fastly), and its crash reporter ran
+    after crashes at stop (crash reports can hold the page: verdicts). Rule 5
+    (no network except freshclam): `MOZ_CRASHREPORTER_DISABLE=1` in the
+    unit, and `IPAddressDeny=any` + `IPAddressAllow=localhost` on the slice of
+    the account (`/etc/systemd/system/user-<uid>.slice.d/50-februus.conf`).
+    First put in the unit, the limit did not apply: `PAMName=login` moves cage
+    and Firefox into a logind session scope (`user-103.slice/session-N.scope`),
+    outside the service; checked on f1 with `ss -tnpe` (connections of uid
+    103 still open).
+- 2026-10-07 — Files too big for the antivirus: RED, at once (user). Seen on
+  f1: a Windows installer key (Rufus, `install.wim` of several GB) was
+  analyzed for 7 minutes, then red: Februus first reads every file (fail-open
+  fix of 2026-10-02) and clamd then refuses a file above `MaxFileSize`.
+  Orange was asked, then refused after explanation: inflating a malware
+  beyond the antivirus size limit (MITRE ATT&CK T1027.001, binary padding)
+  is a known trick, and orange would let it through; raising the limit does
+  not help (clamd cannot go above 4 GB, and a 4 GB file takes minutes). Now
+  the inventory (which already has the sizes) gives `file.too_big` (red,
+  message "Un fichier est trop gros pour être vérifié (vidéo, sauvegarde,
+  image disque...)", file name in the key log) for every file above
+  `scan.max_file_mb`, and nothing is read nor analyzed. New REQUIRED setting
+  `scan.max_file_mb = 1000`, equal to `MaxFileSize` of
+  `deploy/clamav/clamd-februus.conf` (a unit test checks it); new rule
+  `"file.too_big" = "red"`.
+- 2026-10-07 — Antivirus limit 3 GB instead of 1 GB (then 2 GB, see the end
+  of this entry) (user: videos and
+  backups up to 3 GB can be checked; the station has 16 GB of RAM, but time
+  and temporary disk space are the real limits). `scan.max_file_mb = 3000`
+  and clamd `MaxFileSize 3000M` (a test keeps them equal), `MaxScanSize
+  4000M` (archive contents included; clamd cannot go above 4 GB),
+  `MaxScanTime 600000` and `scan.file_timeout_seconds = 600` (a test checks
+  that clamd never stops a file before Februus: a 3 GB file takes about 3
+  minutes at the 18 MB/s measured on f1). The files clamd extracts from
+  archives go to `/var/lib/februus-clamd` (`TemporaryDirectory`), not to
+  `/tmp` (a 2.7 GB partition on f1, filled once by the tests) nor
+  `/var/tmp` (emptied by systemd: a missing folder would make every archive
+  red); allowed by AppArmor through `/etc/apparmor.d/local/usr.sbin.clamd`
+  (`deploy/clamav/apparmor-local-clamd`). A Windows installer key stays red
+  (`install.wim` of 4 to 6 GB). The result screen now lists up to 5 names of
+  files too big (invisible characters replaced by "?"), with a plain
+  warning: it can be normal, but it is also a trick of viruses.
+  Correction the same day: clamd 1.4.3 caps `MaxFileSize` at 2 GB without
+  error ("File size limit set to 2147483645 bytes" in its journal, f1): the
+  limit is 2000 MB on both sides (`max_file_mb = 2000`, `MaxFileSize
+  2000M`); with 3000, a file of 2 to 3 GB would be read in full, then
+  refused by clamd (red, but slow).

@@ -127,14 +127,14 @@ Autres commandes : `februus --help`, et la liste dans [AGENTS.md](AGENTS.md)
 **Guide pas à pas, en copier-coller : [docs/INSTALL.fr.md](docs/INSTALL.fr.md)**
 ([in English](docs/INSTALL.md)).
 
-Sur Debian 13, depuis une copie du dépôt :
+Sur Debian 13, en root (`su -`), depuis une copie du dépôt :
 
 ```
-sudo deploy/install.sh --name f3    # première installation : nom de la station
-sudo deploy/install.sh              # paquets, comptes, règles, services
-sudo deploy/install.sh --usbguard   # aussi les règles USBGuard : les appareils
-                                    # branchés maintenant (clavier, souris) sont
-                                    # les seuls appareils hors stockage autorisés
+deploy/install.sh --name f3    # première installation : nom de la station
+deploy/install.sh              # paquets, comptes, règles, services
+deploy/install.sh --usbguard   # aussi les règles USBGuard : les appareils
+                               # branchés maintenant (clavier, souris) sont
+                               # les seuls appareils hors stockage autorisés
 ```
 
 Les stations s'appellent f1, f2, ... f12 (sans zéro devant). `--name` donne le
@@ -177,6 +177,7 @@ obligatoire et validée au démarrage : `februus config check`. Exemple comment�
 | [docs/STATUS.md](docs/STATUS.md) | Avancement, décisions, questions ouvertes (en anglais) |
 | [PLAN.md](PLAN.md) | Plan du projet et architecture (en français) |
 | [docs/hardware-validation.md](docs/hardware-validation.md) | Contrôles à passer sur la vraie station (en anglais) |
+| [docs/DEV-STATION.md](docs/DEV-STATION.md) | Préparer un PC de développement et de test, jamais une station de production (en anglais, résumé en français) |
 | [docs/poster/](docs/poster/) | Affiche pour les utilisateurs, à imprimer à côté de la station |
 | [docs/demo.md](docs/demo.md) | Script de démonstration (en français) |
 

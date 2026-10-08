@@ -36,6 +36,8 @@ class Screen:
     # ETA above [scan] long_scan_warning_minutes: "come back at HH:MM".
     long_scan: bool = False
     problems: tuple[Problem, ...] = ()
+    # Files too big to be checked (names from the key, escaped by Jinja2).
+    big_files: tuple[str, ...] = ()
     # Signatures of the last session that knew them (idle status line).
     signatures: str | None = None
     # Last session: the page reloads when it changes (None: no session yet).
@@ -81,6 +83,7 @@ def screen_for(session: SessionStatus, long_scan_minutes: int) -> Screen:
             files_total=session.files_total,
             files_done=session.files_done,
             problems=tuple(Problem(FINDING_MESSAGES.get(code), code) for code in session.problems),
+            big_files=session.big_files,
             **common,
         )
     # FAIL-CLOSED / FR : état inattendu = station hors service.

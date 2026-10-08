@@ -82,7 +82,7 @@ def serving(monkeypatch, tmp_path):
     config.write_text((REPO_ROOT / "config" / "februus.dev.toml").read_text())
     FakeServer.stopped = threading.Event()
     FakeServer.port_in_use = False
-    monkeypatch.setattr("februus.web.app.create_app", lambda config, status, scanner_alive: object())
+    monkeypatch.setattr("februus.web.app.create_app", lambda config, status, scanner_alive, stopping: object())
     monkeypatch.setattr("uvicorn.Config", lambda app, host, port: None)
     monkeypatch.setattr("uvicorn.Server", FakeServer)
     previous = signal.signal(signal.SIGTERM, lambda signum, frame: FakeServer.stopped.set())
@@ -103,7 +103,7 @@ def test_serve_stops_when_the_key_watcher_fails(monkeypatch, serving):
     monkeypatch.setattr("februus.scanner.udev.key_events", broken_events)
     monkeypatch.setattr(
         "februus.web.app.create_app",
-        lambda config, status, scanner_alive: alive.append(scanner_alive) or object(),
+        lambda config, status, scanner_alive, stopping: alive.append(scanner_alive) or object(),
     )
     code = main(["serve", "-c", str(serving)])
     assert FakeServer.stopped.is_set()

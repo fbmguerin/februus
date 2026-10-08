@@ -98,10 +98,11 @@ Read first: `docs/STATUS.md` (short). Then only what the task needs:
   `python3 tools/demo-images.py <folder>` — inspectors on disk images
 - `februus serve -c <config>` — the one service of a station (keys,
   analysis and screens)
-- `sudo deploy/install.sh [--name f3] [--no-apt] [--usbguard] [--kiosk]` —
-  install or update a station; logs: `journalctl -u februus`
+- `deploy/install.sh [--name f3] [--no-apt] [--usbguard] [--kiosk]` (as
+  root, `su -`: stations have no sudo) — install or update a station; logs:
+  `journalctl -u februus`
 - `februus stats [--days N]` — statistics from the key log
-- `sudo tools/load-test-key.sh /dev/sdX <kit>` — erases a TEST key and loads
-  a kit (eicar, two-partitions, iso...): two keys are enough for the whole
+- `tools/load-test-key.sh /dev/sdX <kit>` (as root) — erases a TEST key and
+  loads a kit (eicar, two-partitions, iso...): two keys are enough for the whole
   acceptance test (`docs/TEST-PC-B.md`); `tools/make-test-files.py` makes the
-  files; `sudo tools/station-report.sh` — read-only report of a station
+  files; `tools/station-report.sh` (as root) — read-only report of a station

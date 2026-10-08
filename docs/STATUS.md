@@ -9,7 +9,7 @@ A 100 % working demonstrator on 5 stations of the préfecture, used by the
 agents. No certification, no signing: later. Plain explanation:
 `docs/HOW-IT-WORKS.md`.
 
-## Where we are (end of the session of 2026-10-05)
+## Where we are (session of 2026-10-06 and 07, branch `fix/f1-first-install`)
 
 - **Code**: simplified (one service `februus`, status in memory, key log,
   plain inspector list, no witness file, no SQLite). Screens in simple FRENCH
@@ -32,15 +32,30 @@ agents. No certification, no signing: later. Plain explanation:
   is the reference, `*.fr.md` follow.
 - **Tools**: `tools/load-test-key.sh` (two test keys are enough),
   `tools/make-test-files.py`, `tools/station-report.sh`.
+- **f1** (development station, ThinkCentre M710q, Debian 13 minimal, no sudo,
+  ultra-wide DisplayPort screen, `docs/DEV-STATION.md`): installed with the
+  kiosk and the theme. Kiosk at boot OK (9 boots). Fixed on the way (see
+  `decisions.md`, 2026-10-06/07): cage `-s` and one rescue console (F2);
+  wait for the real GPU driver; no sleep, `consoleblank=0`; sounds (muted
+  mixer); frozen screen when the network comes up (watchdog
+  `web.watchdog_seconds`, new REQUIRED setting, and Firefox network prefs);
+  `systemctl stop` hanging 90 s; stale CSS after an update (`no-cache`);
+  cage hung when restarted on another console (`chvt 1`); the kiosk Firefox
+  talked to Mozilla (network limit on the kiosk user slice). Results:
+  `docs/hardware-validation.md` sections 7, 8 and "f1". Theme fix for wide
+  screens: PR #1 of `februus-theme-moselle` (draft).
 
-## Next step: test on the second mini PC (user)
+## Next step
 
-Follow `docs/TEST-PC-B.fr.md` with `docs/INSTALL.fr.md`: Debian 13 without
-desktop, Februus, the keys, USBGuard, robustness (power cut), kiosk at boot,
-theme, acceptance with an agent who does not know the project. Note every
-unclear step of the guide in the friction table, write the results in
-`docs/hardware-validation.md` (`PC B 2026-10-xx: ...`), never a result that was
-not seen. Then T15.
+1. Study of the commercial station that Februus should replace (user, with
+   the written agreement of the tutor): its SSD, read-only on f1, service
+   `februus` stopped. Does it really analyze (expired licence?), why 10 s
+   per key, which checks. Results in a PRIVATE note, never in this public
+   repository (no reverse engineering, no decompilation).
+2. Then the test on the second mini PC: follow `docs/TEST-PC-B.fr.md` with
+   `docs/INSTALL.fr.md`; note every unclear step in the friction table, write
+   the results in `docs/hardware-validation.md` (`PC B 2026-10-xx: ...`),
+   never a result that was not seen. Then T15.
 
 ## Waiting for the user (go on with the rest meanwhile)
 
@@ -57,8 +72,6 @@ not seen. Then T15.
   préfecture / SIDSIC in `AGENTS.md`, `PLAN.md` and this file: keep or
   generalise. The author of the public commits is "François Guerin"
   (GitHub noreply address).
-- Files bigger than the clamd limits (videos > 1 GB): red today; orange with a
-  "file not analyzed" message?
 - `device.boot_flag`: red or orange (how many real keys have the MBR flag?
   check 5.3 with 10 ordinary keys of the préfecture).
 - External hard disks on a USB adapter: allowed like keys. Accept or refuse?
@@ -80,11 +93,26 @@ real key removal). The simplification project (D16, steps 1 to 4) is finished
 and merged.
 - [x] T10 USBGuard + udev: checked with real keys (PC A)
 - [~] T14 install and one-service `februus.service` checked on PC A (reboot
-  OK); kiosk tried in a window only, NOT at boot (needs PC B)
+  OK); kiosk at boot checked on f1 (2026-10-06); still to see on PC B with
+  the install guide, and the keyboard shortcuts (8.6), polkit (8.7)
 - [ ] T15 full acceptance test (`docs/TEST-PC-B.md`, PLAN.md section 6)
 - [~] T16 README, poster, demo (`docs/demo.md`), install guide: to check on PC B
 
 ## Known issues
+
+- Speed (f1): plug to red verdict 3.6 s (2 s are `scanner.settle_seconds`).
+  ClamAV is the cost of a real analysis (about 9 ms per small file, 18 MB/s;
+  Februus adds 5 %): one file at a time, one CPU thread of four. Leads:
+  several files at once to clamd (MaxThreads 12), a shorter settle. Mounting
+  not measured yet (no green key plugged on f1). Android backup key (user):
+  about 4500 files, 30 GB, one hour (8.5 MB/s): to explain (USB speed,
+  ClamAV on photos and videos, files above 2 GB).
+- Lead (not decided): Cog (WebKit kiosk browser, Debian package) instead of
+  Firefox: smaller, no UI, but no policy file and all kiosk checks to redo.
+- An update needs `watchdog_seconds = 10` in `[web]` of an existing
+  `/etc/februus/februus.toml` (install.sh stops and says so).
+- Kingston DataTraveler 3.0 on f1: USB 3 errors, disk seen after 1 minute
+  or never (hardware); red, never green.
 
 - ETA uses bytes: with thousands of small files it shows 0 while minutes are
   left (about 17 ms per file on FAT32). No time estimate for the first second.
@@ -92,7 +120,11 @@ and merged.
   screen (only the ones plugged in later).
 - No self-test at scanner start and no "station degraded" screen for old
   signatures or clamd down.
-- clamd size limits (MaxFileSize 1000M, MaxScanSize 2000M): bigger = red.
+- A file bigger than `scan.max_file_mb` (2000, = clamd MaxFileSize, its
+  maximum) is red
+  `file.too_big` at once, its name on screen (user, 2026-10-07: red, not
+  orange; a Windows installer key is red). An update needs `max_file_mb =
+  2000` and `file_timeout_seconds = 600` in `[scan]`.
 - A new required config key makes an old `/etc/februus/februus.toml` invalid
   after an update (wanted: no hidden default).
 - polkit lets an active desktop user mount keys: a station must have no desktop

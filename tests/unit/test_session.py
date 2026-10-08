@@ -449,6 +449,33 @@ def test_too_many_entries_is_red(raw, status, folder):
     assert result.files_total == 0
 
 
+def test_file_bigger_than_the_antivirus_limit_is_red_at_once(raw, status, folder):
+    raw["scan"]["max_file_mb"] = 1
+    with open(folder / "video.mp4", "wb") as file:
+        file.truncate(2 * 1024 * 1024)  # sparse: 2 MB, nothing written
+    result = scan(raw, status, folder)
+    assert result.verdict is Color.RED
+    assert codes(result) == ["file.too_big"]
+    # Stopped before the analysis: nothing was read.
+    assert result.files_total == 0
+
+
+def test_names_of_big_files_go_to_the_screen_without_invisible_characters(raw, status, folder):
+    raw["scan"]["max_file_mb"] = 1
+    # U+202E (right-to-left mark) would show "evil\u202emp4.exe" as "evilexe.4pm".
+    with open(folder / "evil\u202emp4.exe", "wb") as file:
+        file.truncate(2 * 1024 * 1024)
+    scan(raw, status, folder)
+    [name] = status.snapshot().big_files
+    assert name.endswith("evil?mp4.exe")
+
+
+def test_file_at_the_limit_is_analyzed(raw, status, folder):
+    raw["scan"]["max_file_mb"] = 1
+    (folder / "exact.bin").write_bytes(b"x" * 1024 * 1024)
+    assert "file.too_big" not in codes(scan(raw, status, folder))
+
+
 def test_entries_are_counted_across_partitions(raw, status, tmp_path):
     first, second = tmp_path / "sdb1", tmp_path / "sdb2"
     for part in (first, second):

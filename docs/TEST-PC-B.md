@@ -35,12 +35,12 @@ Instead of 12 keys, **two** keys are reloaded as often as needed with
 `tools/load-test-key.sh` (after the install of the guide, the repository is in
 `/usr/local/src/februus`). It erases the key, then writes the files of a kit.
 For safety it refuses everything that is not a small removable USB disk with
-nothing mounted, and asks to type the device name again.
+nothing mounted, and asks to type the device name again. As root (`su -`):
 
 ```
 cd /usr/local/src/februus
 lsblk -o NAME,SIZE,MODEL,TRAN       # find the key: /dev/sdb for example (not a partition!)
-sudo tools/load-test-key.sh /dev/sdb eicar
+tools/load-test-key.sh /dev/sdb eicar
 ```
 
 Then **unplug the key and plug it in again**: the station analyzes it. Wait
@@ -50,7 +50,7 @@ with two keys at once and for the USBGuard tests.
 
 | Kit | Command (`/dev/sdb` = the key) | Expected |
 |---|---|---|
-| clean FAT32 (26 ordinary files) | `sudo tools/load-test-key.sh /dev/sdb clean` | **green** (2.2) |
+| clean FAT32 (26 ordinary files) | `tools/load-test-key.sh /dev/sdb clean` | **green** (2.2) |
 | NTFS, exFAT | `... ntfs`, `... exfat` | **green** |
 | EICAR | `... eicar` | **red** `clamav.detected` (2.3, 7.3) |
 | EICAR in a zip | `... eicar-zip` | **red** `clamav.detected` |
@@ -59,7 +59,7 @@ with two keys at once and for the USBGuard tests.
 | two clean partitions | `... two-partitions` | **orange** `device.multi_partition` (2.4) |
 | two partitions, EICAR on the second | `... two-partitions-eicar` | **red**, path `sdb2/...` |
 | 900 MB file | `... big` | long analysis, ETA, removal test (3.1, 3.2) |
-| 1.1 GB file | `... toobig` | **red** `scan.limit_exceeded` (about 12 s) |
+| 1.1 GB file | `... toobig` | **green** since the 2 GB limit (about 1 minute); a file above 2 GB is red `file.too_big` at once |
 | real bootable ISO | `... iso /root/debian-13.7.0-amd64-netinst.iso` | **red** `device.bootable`, never mounted (2.5) |
 
 For the ISO: `curl -fL -o /root/debian-13.7.0-amd64-netinst.iso
@@ -95,9 +95,9 @@ reason; a quick format does not.
 | 6 | Kiosk | guide step 6, reboot. Screen at boot, sounds (green, orange, red, alarm) heard by a person, keyboard shortcuts (Ctrl+L, Ctrl+T, F11, Ctrl+Alt+F3) give no way out | 7.12, 8.1-8.7 | 40 min |
 | 7 | Theme | guide "Theme of the Préfecture de la Moselle" (**read the warning**), then check every screen with the keys of phase 3 (idle, analysis, green, orange, red, removed, two keys, blocked device) | — | 25 min |
 | 8 | Acceptance with an agent | a person who does not know the project, only the poster, no help: the kits `clean` (green), `eicar` (red), then removes the key during the analysis of the kit `big`. Note hesitations and wrong guesses | T15 | 20 min |
-| 9 | Wrap-up | `sudo tools/station-report.sh` after the phases; write the results; commit the corrections of the guide | — | 20 min |
+| 9 | Wrap-up | `tools/station-report.sh` (as root) after the phases; write the results; commit the corrections of the guide | — | 20 min |
 
-Run `sudo tools/station-report.sh > /root/report-phase<N>.txt` at the end of
+As root (`su -`), run `tools/station-report.sh > /root/report-phase<N>.txt` at the end of
 each phase: it is a read-only snapshot (services, signatures age, USBGuard
 devices, mounts, last keys, journal). Paste it in a message to get help.
 

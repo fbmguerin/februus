@@ -244,7 +244,11 @@ def serve_command(args: argparse.Namespace) -> int:
         os.kill(os.getpid(), signal.SIGTERM)
 
     watcher = threading.Thread(target=watch_keys, name="key-watcher", daemon=True)
-    app = create_app(config, status, scanner_alive=watcher.is_alive)
+    # The live streams end when the server stops (else "systemctl stop" waits
+    # for them, up to web.stream_seconds).
+    app = create_app(
+        config, status, scanner_alive=watcher.is_alive, stopping=lambda: server.should_exit
+    )
     server = uvicorn.Server(uvicorn.Config(app, host=config.web.host, port=config.web.port))
     # The port is taken BEFORE the keys are watched: a second service (the
     # port is in use) stops here and never analyzes a key.
@@ -273,7 +277,8 @@ def demo_command(args: argparse.Namespace) -> int:
     # No device: the inspectors only run on a real key (or "februus inspect").
     scanner = Scanner(config, status, DirectoryReader(), open_device=lambda disk: None)
     server = uvicorn.Server(uvicorn.Config(
-        create_app(config, status), host=config.web.host, port=config.web.port,
+        create_app(config, status, stopping=lambda: server.should_exit),
+        host=config.web.host, port=config.web.port,
         log_level="warning",
     ))
     thread = threading.Thread(target=server.run, daemon=True)

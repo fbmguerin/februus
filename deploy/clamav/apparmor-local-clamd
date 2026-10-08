@@ -1,0 +1,6 @@
+# Februus: clamd may write the files it extracts from archives here
+# (TemporaryDirectory in deploy/clamav/clamd-februus.conf). Installed by
+# deploy/install.sh as /etc/apparmor.d/local/usr.sbin.clamd.
+# FR : dossier des fichiers extraits des archives par clamd.
+/var/lib/februus-clamd/ rw,
+/var/lib/februus-clamd/** krw,

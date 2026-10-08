@@ -3,6 +3,7 @@
 import copy
 import json
 import re
+import time
 import tomllib
 from datetime import datetime
 from pathlib import Path
@@ -235,15 +236,23 @@ def make_client(raw, status, **kwargs):
     return TestClient(create_app(parse_config(raw), status, theme_dir=NO_THEME, **kwargs))
 
 
-def screen_events(client) -> list[dict]:
-    """All "screen" events of one live stream (it lasts stream_seconds)."""
+def stream_events(client) -> list[tuple[str, str]]:
+    """(event name, data) of one live stream (it lasts stream_seconds)."""
     events = []
+    name = ""
     with client.stream("GET", "/events") as response:
         assert response.headers["content-type"].startswith("text/event-stream")
         for line in response.iter_lines():
-            if line.startswith("data: "):
-                events.append(json.loads(line.removeprefix("data: ")))
+            if line.startswith("event: "):
+                name = line.removeprefix("event: ")
+            elif line.startswith("data: "):
+                events.append((name, line.removeprefix("data: ")))
     return events
+
+
+def screen_events(client) -> list[dict]:
+    """All "screen" events of one live stream."""
+    return [json.loads(data) for name, data in stream_events(client) if name == "screen"]
 
 
 def test_live_stream_sends_the_screen_once(client):
@@ -268,6 +277,53 @@ def test_live_page_loads_the_script_and_preview_does_not(client):
     assert "/static/live.js" in client.get("/").text
     assert "/static/live.js" not in client.get("/preview/scanning").text
     assert client.get("/static/live.js").status_code == 200
+
+
+def test_live_stream_sends_signs_of_life_between_changes(raw, status):
+    # watchdog 3 s: a sign of life every second; the stream lasts 2 s.
+    raw["web"]["watchdog_seconds"] = 3
+    raw["web"]["stream_seconds"] = 2
+    names = [name for name, _ in stream_events(make_client(raw, status))]
+    assert names[0] == "screen"
+    assert names.count("screen") == 1
+    assert names.count("alive") >= 1
+
+
+def test_files_are_checked_again_at_each_load(client):
+    # After an update the kiosk must not keep an old style sheet.
+    for path in ("/", "/static/style.css", "/static/live.js"):
+        assert client.get(path).headers["cache-control"] == "no-cache"
+
+
+def test_result_lists_the_big_files_escaped(client, status):
+    add_session(status, "result", verdict="red", codes=[("file.too_big", "red")],
+                big_files=("sda1/video.mp4", "sda1/<b>x</b>.iso"))
+    text = client.get("/").text
+    assert "trop gros pour être vérifiés" in text
+    assert "sda1/video.mp4" in text
+    assert "&lt;b&gt;x&lt;/b&gt;.iso" in text and "<b>x</b>" not in text
+
+
+def test_live_stream_ends_when_the_server_stops(raw, status):
+    raw["web"]["stream_seconds"] = 30
+    client = TestClient(create_app(
+        parse_config(raw), status, theme_dir=NO_THEME, stopping=lambda: True
+    ))
+    started = time.monotonic()
+    stream_events(client)
+    assert time.monotonic() - started < 5
+
+
+def test_live_script_has_the_watchdog_and_the_out_of_service_text(raw, status):
+    raw["web"]["watchdog_seconds"] = 7
+    response = make_client(raw, status).get("/static/live.js")
+    assert response.status_code == 200
+    assert response.headers["content-type"].startswith("text/javascript")
+    script = response.text
+    assert "const WATCHDOG_MS = 7000;" in script
+    assert "Station hors service" in script
+    # The HTML is a JSON string: no raw "<" that could close a <script>.
+    assert "<h1>" not in script
 
 
 def test_long_scan_shows_come_back_time(raw, status):
@@ -397,6 +453,7 @@ def test_theme_replaces_templates_and_serves_its_files(raw, status):
 def test_theme_keeps_the_live_screens_and_the_notice(raw, status):
     status.set_extra_keys(1)
     client = TestClient(create_app(parse_config(raw), status, theme_dir=EXAMPLE_THEME))
-    [event] = screen_events(client)
+    # The first event (the idle tip may change during the stream: a second one).
+    event = screen_events(client)[0]
     assert "Retirez-la, puis rebranchez-la" in event["main"]
     assert "Thème d'exemple" not in event["main"]  # <main> only

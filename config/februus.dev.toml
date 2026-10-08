@@ -16,7 +16,9 @@ path = "/tmp/februus-dev/keys.jsonl"
 
 [scan]
 # Maximum time to analyze one file. Exceeded: finding "scan.timeout" (red).
-file_timeout_seconds = 120
+# A 2 GB file takes about 2 minutes on a small mini PC (f1: 18 MB/s). Not
+# above MaxScanTime of deploy/clamav/clamd-februus.conf.
+file_timeout_seconds = 600
 # Maximum time for a whole session. Exceeded: finding "scan.timeout" (red).
 session_timeout_minutes = 240
 # If the estimated time left is longer, show "Do not remove the key,
@@ -28,6 +30,10 @@ progress_update_seconds = 1
 cancel_check_ms = 200
 # More files and folders than this on a key: "scan.limit_exceeded" (red).
 max_entries = 200000
+# A file bigger than this (MB) gives "file.too_big" (red) at once, before
+# anything is read: clamd does not scan it anyway. Same value as MaxFileSize
+# in deploy/clamav/clamd-februus.conf.
+max_file_mb = 2000
 # Maximum wait for one mount or unmount of the key (udisks2).
 mount_timeout_seconds = 30
 
@@ -47,6 +53,7 @@ poll_interval_ms = 500
 "archive.encrypted"       = "red"
 "pdf.encrypted"           = "red"
 "scan.limit_exceeded"     = "red"
+"file.too_big"            = "red"
 "scan.timeout"            = "red"
 "device.refused"          = "red"
 "device.bootable"         = "red"
@@ -74,6 +81,11 @@ preview_screens = true
 # connection lasts before the browser reconnects (it does it by itself).
 poll_interval_ms = 500
 stream_seconds = 300
+# Live screen watchdog: if the browser receives nothing for this many
+# seconds (frozen or lost connection), it hides the screen, shows "Station
+# hors service" and reloads as soon as the service answers. The service
+# sends a sign of life three times in this delay.
+watchdog_seconds = 10
 # Idle screen: a new security tip every N seconds.
 tip_change_seconds = 20
 # Sounds at the result (autoplay allowed for 127.0.0.1 in the kiosk).

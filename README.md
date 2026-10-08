@@ -115,14 +115,14 @@ Other commands: `februus --help`, and the list in [AGENTS.md](AGENTS.md)
 
 **Step-by-step guide, copy and paste: [docs/INSTALL.md](docs/INSTALL.md)** ([en français](docs/INSTALL.fr.md)).
 
-On Debian 13, from a copy of the repository:
+On Debian 13, as root (`su -`), from a copy of the repository:
 
 ```
-sudo deploy/install.sh --name f3    # first install: name of the station
-sudo deploy/install.sh              # packages, accounts, rules, services
-sudo deploy/install.sh --usbguard   # also the USBGuard rules: the devices
-                                    # plugged in now (keyboard, mouse) are
-                                    # the only non-storage devices allowed
+deploy/install.sh --name f3    # first install: name of the station
+deploy/install.sh              # packages, accounts, rules, services
+deploy/install.sh --usbguard   # also the USBGuard rules: the devices
+                               # plugged in now (keyboard, mouse) are
+                               # the only non-storage devices allowed
 ```
 
 Stations are named f1, f2, ... f12 (no leading zeros). `--name` sets
@@ -164,6 +164,7 @@ and validated at startup: `februus config check`. Annotated example:
 | [docs/STATUS.md](docs/STATUS.md) | Progress, decisions, open questions |
 | [PLAN.md](PLAN.md) | Project plan and architecture (French) |
 | [docs/hardware-validation.md](docs/hardware-validation.md) | Checks to pass on the real station |
+| [docs/DEV-STATION.md](docs/DEV-STATION.md) | Prepare a development and test PC (never a production station) |
 | [docs/poster/](docs/poster/) | Poster for the users, to print next to the station |
 | [docs/demo.md](docs/demo.md) | Demonstration script (French) |
 

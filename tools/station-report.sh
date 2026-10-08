@@ -1,7 +1,7 @@
 #!/bin/bash
 # Report of the state of a station (read-only): to paste in a message when
 # something goes wrong, or to note the state during the acceptance test.
-# Run as root:   sudo tools/station-report.sh
+# Run as root (su -):   tools/station-report.sh
 # FR : rapport en lecture seule de l'état de la station.
 PATH="$PATH:/usr/sbin:/sbin"
 title() { echo; echo "== $*"; }
@@ -32,7 +32,7 @@ echo "--- mounts of removable disks:"; grep -E ' /media/| /dev/sd' /proc/self/mo
 
 title "Keys log (last 5 lines) and statistics"
 tail -n 5 /var/log/februus/keys.jsonl 2>&1 | cut -c1-240
-sudo -u februus februus stats 2>&1 | head -8
+runuser -u februus -- februus stats 2>&1 | head -8
 
 title "Journal (last 25 lines)"
 journalctl -u februus -n 25 --no-pager -o cat 2>&1 | grep -v 'GET ' | cut -c1-200

@@ -13,6 +13,8 @@ Time: about 1 hour, part of it waiting for downloads.
 - A mini PC with screen, keyboard, mouse, speaker and a network cable
   (Internet is needed for the installation, then to update the antivirus
   signatures).
+- A screen connected with **HDMI or DisplayPort**. Avoid VGA: on the first
+  tries it gave a cut picture and a screen going to sleep.
 - A USB stick with the Debian 13 installer.
 - The name of the station: `f1`, `f2`, ... `f12` (no leading zero).
 - A test USB key (optional, to check at the end).
@@ -22,7 +24,7 @@ Time: about 1 hour, part of it waiting for downloads.
 Download the installer **`debian-13.7.0-amd64-netinst.iso`** (64-bit, small, the
 rest is downloaded during the installation) from
 <https://www.debian.org/distrib/netinst> (a newer `13.x` is fine), and write
-it on a USB stick (on Linux: `sudo dd if=debian-13.7.0-amd64-netinst.iso
+it on a USB stick (on Linux, as root: `dd if=debian-13.7.0-amd64-netinst.iso
 of=/dev/<the-stick> bs=4M status=progress conv=fsync`; on Windows: Rufus, DD
 mode). **Check the name of the stick before `dd`: it erases it.**
 
@@ -142,12 +144,16 @@ installed with Firefox and `cage` (a tiny window manager).
 reboot
 ```
 
-After the reboot, the screen "Insérez votre clé USB" ("Insert your USB key") must appear by itself.
+After the reboot, the screen "Insérez votre clé USB" ("Insert your USB key")
+must appear by itself. Before it, for up to about 30 seconds, you may see
+lines of text or a black screen: the kiosk waits for the graphics driver.
 
-> The kiosk was tried in a window, **not yet at the boot of a PC without
-> desktop** (see `docs/hardware-validation.md`, section 8). If the screen
-> stays black, log in over SSH and look at `journalctl -u februus-kiosk -b`;
-> the station itself (the analysis of keys) keeps working.
+If after one minute the screen still shows lines of text (for example
+`Found 0 GPUs` or `Unable to create the wlroots backend`), a login prompt, or
+stays black, the kiosk did not start: see [Get back control of a station in
+kiosk mode](#get-back-control-of-a-station-in-kiosk-mode) and look at
+`journalctl -u februus-kiosk -b`. The station itself (the analysis of keys)
+keeps working.
 
 To be even cleaner, then do the checks of sections 7 and 8 of
 `docs/hardware-validation.md` (write the results in the "Result" column).
@@ -243,6 +249,22 @@ The script can be run again safely. It keeps the configuration
 setting, it stops **without breaking anything** and tells what to fix (compare
 with `config/februus.example.toml`).
 
+**Station installed before 2026-10-07:** the new version needs three
+settings. Add them, then run the script again:
+
+```
+F=/etc/februus/februus.toml
+sed -i '/^stream_seconds = /a watchdog_seconds = 10' $F
+sed -i '/^max_entries = /a max_file_mb = 2000' $F
+sed -i 's/^file_timeout_seconds = .*/file_timeout_seconds = 600/' $F
+sed -i '/^"scan.limit_exceeded" /a "file.too_big"            = "red"' $F
+februus config check
+./deploy/install.sh --kiosk
+```
+
+With the theme, add `--theme /usr/local/src/februus-theme-moselle` (after a
+`git pull` in that folder).
+
 ## If something goes wrong
 
 | Symptom | What to do |
@@ -254,6 +276,29 @@ with `config/februus.example.toml`).
 | See what happened | `journalctl -u februus -f` (live), `februus stats`, `cat /var/log/februus/keys.jsonl` |
 | Keyboard or mouse blocked after `--usbguard` | The script detects it and puts the old rules back by itself. Otherwise: `systemctl stop usbguard` |
 | Change the name of the station | `./deploy/install.sh --name f4` |
+| The kiosk does not start, or you need a terminal on the station | See the next section |
+
+## Get back control of a station in kiosk mode
+
+The kiosk takes the whole screen on purpose. To get a terminal on the station:
+
+1. **Change console:** press **Ctrl+Alt+F2**. A text console asks for a login
+   (`root`, or your user then `su -`). **Ctrl+Alt+F1** goes back to the
+   kiosk. Only console 2 has a login: F3 to F6 show an empty screen. If the
+   kiosk restarts (for example `systemctl restart februus-kiosk`), it takes
+   the screen back: press Ctrl+Alt+F2 again.
+2. **Start without the kiosk** (if the screen is stuck): restart the PC. In
+   the GRUB menu (the list shown at the start), press `e`. Go to the end of
+   the line that starts with `linux` and add ` 3` (a space, then 3). Press
+   **Ctrl+X** to start. The PC starts in text mode, without the kiosk (the
+   kiosk belongs to the graphical mode). This is for this boot only: the next
+   normal reboot starts the kiosk again.
+   - GRUB always uses an **English (QWERTY) keyboard**. On a French AZERTY
+     keyboard, `3` is the key `"` **without** Shift.
+   - If the GRUB menu does not show, hold **Esc** (or **Shift**) during the
+     start of the PC.
+3. **Otherwise, use SSH** from another PC: `ssh <user>@<station-address>`,
+   then `su -`.
 
 ## What the installation put on the PC
 
@@ -265,7 +310,14 @@ with `config/februus.example.toml`).
   to the machine);
 - the key log `/var/log/februus/keys.jsonl` (one line per key);
 - the USB rules (USBGuard), udev, udisks2 and polkit;
+- the ClamAV settings: files up to 2 GB are checked (bigger: red at once),
+  extracted archive contents go to `/var/lib/februus-clamd` (allowed by
+  `/etc/apparmor.d/local/usr.sbin.clamd`);
+- no sleep: the sleep targets are masked, and `consoleblank=0`
+  (`/etc/default/grub.d/februus.cfg`) keeps the screen on;
 - with `--kiosk`: the service `februus-kiosk` and the Firefox rules that only
-  allow the station screen.
+  allow the station screen; the browser can only reach this machine (network
+  limit on its account); one rescue console (Ctrl+Alt+F2); sounds at full
+  volume.
 
 How it works in detail: `docs/HOW-IT-WORKS.md`. Decisions: `docs/decisions.md`.

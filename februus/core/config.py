@@ -57,6 +57,7 @@ class ScanConfig:
     progress_update_seconds: int
     cancel_check_ms: int
     max_entries: int
+    max_file_mb: int
     mount_timeout_seconds: int
 
 
@@ -79,6 +80,7 @@ class WebConfig:
     preview_screens: bool
     poll_interval_ms: int
     stream_seconds: int
+    watchdog_seconds: int
     tip_change_seconds: int
     sounds: bool
 
@@ -158,6 +160,7 @@ def parse_config(data: Mapping[str, Any], sources: tuple[Path, ...] = ()) -> Con
     progress_update = scan.get_int("progress_update_seconds", minimum=1)
     cancel_check = scan.get_int("cancel_check_ms", minimum=10)
     max_entries = scan.get_int("max_entries", minimum=1)
+    max_file_mb = scan.get_int("max_file_mb", minimum=1)
     mount_timeout = scan.get_int("mount_timeout_seconds", minimum=1)
     scan.finish()
 
@@ -179,6 +182,7 @@ def parse_config(data: Mapping[str, Any], sources: tuple[Path, ...] = ()) -> Con
     preview_screens = web.get_bool("preview_screens")
     poll_interval = web.get_int("poll_interval_ms", minimum=100)
     stream_seconds = web.get_int("stream_seconds", minimum=1)
+    watchdog_seconds = web.get_int("watchdog_seconds", minimum=3)
     tip_change = web.get_int("tip_change_seconds", minimum=1)
     sounds = web.get_bool("sounds")
     web.finish()
@@ -199,6 +203,7 @@ def parse_config(data: Mapping[str, Any], sources: tuple[Path, ...] = ()) -> Con
             progress_update_seconds=progress_update,
             cancel_check_ms=cancel_check,
             max_entries=max_entries,
+            max_file_mb=max_file_mb,
             mount_timeout_seconds=mount_timeout,
         ),
         scanner=ScannerConfig(
@@ -213,6 +218,7 @@ def parse_config(data: Mapping[str, Any], sources: tuple[Path, ...] = ()) -> Con
             preview_screens=preview_screens,
             poll_interval_ms=poll_interval,
             stream_seconds=stream_seconds,
+            watchdog_seconds=watchdog_seconds,
             tip_change_seconds=tip_change,
             sounds=sounds,
         ),

@@ -24,6 +24,12 @@
     "OverridePostUpdatePage": "",
     "PromptForDownloadLocation": false,
     "ExtensionSettings": {"*": {"installation_mode": "blocked"}},
-    "Permissions": {"Autoplay": {"Allow": ["http://127.0.0.1:8080"], "Default": "block-audio-video"}}
+    "Permissions": {"Autoplay": {"Allow": ["http://127.0.0.1:8080"], "Default": "block-audio-video"}},
+    "Preferences": {
+      "network.notify.changed": {"Value": false, "Status": "locked"},
+      "network.manage-offline-status": {"Value": false, "Status": "locked"},
+      "network.connectivity-service.enabled": {"Value": false, "Status": "locked"},
+      "network.captive-portal-service.enabled": {"Value": false, "Status": "locked"}
+    }
   }
 }
