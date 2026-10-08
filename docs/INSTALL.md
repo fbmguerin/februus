@@ -249,6 +249,22 @@ The script can be run again safely. It keeps the configuration
 setting, it stops **without breaking anything** and tells what to fix (compare
 with `config/februus.example.toml`).
 
+**Station installed before 2026-10-07:** the new version needs three
+settings. Add them, then run the script again:
+
+```
+F=/etc/februus/februus.toml
+sed -i '/^stream_seconds = /a watchdog_seconds = 10' $F
+sed -i '/^max_entries = /a max_file_mb = 2000' $F
+sed -i 's/^file_timeout_seconds = .*/file_timeout_seconds = 600/' $F
+sed -i '/^"scan.limit_exceeded" /a "file.too_big"            = "red"' $F
+februus config check
+./deploy/install.sh --kiosk
+```
+
+With the theme, add `--theme /usr/local/src/februus-theme-moselle` (after a
+`git pull` in that folder).
+
 ## If something goes wrong
 
 | Symptom | What to do |
@@ -294,9 +310,14 @@ The kiosk takes the whole screen on purpose. To get a terminal on the station:
   to the machine);
 - the key log `/var/log/februus/keys.jsonl` (one line per key);
 - the USB rules (USBGuard), udev, udisks2 and polkit;
+- the ClamAV settings: files up to 2 GB are checked (bigger: red at once),
+  extracted archive contents go to `/var/lib/februus-clamd` (allowed by
+  `/etc/apparmor.d/local/usr.sbin.clamd`);
 - no sleep: the sleep targets are masked, and `consoleblank=0`
   (`/etc/default/grub.d/februus.cfg`) keeps the screen on;
 - with `--kiosk`: the service `februus-kiosk` and the Firefox rules that only
-  allow the station screen.
+  allow the station screen; the browser can only reach this machine (network
+  limit on its account); one rescue console (Ctrl+Alt+F2); sounds at full
+  volume.
 
 How it works in detail: `docs/HOW-IT-WORKS.md`. Decisions: `docs/decisions.md`.

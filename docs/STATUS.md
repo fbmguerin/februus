@@ -45,14 +45,17 @@ agents. No certification, no signing: later. Plain explanation:
   `docs/hardware-validation.md` sections 7, 8 and "f1". Theme fix for wide
   screens: PR #1 of `februus-theme-moselle` (draft).
 
-## Next step: test on the second mini PC (user)
+## Next step
 
-Follow `docs/TEST-PC-B.fr.md` with `docs/INSTALL.fr.md`: Debian 13 without
-desktop, Februus, the keys, USBGuard, robustness (power cut), kiosk at boot,
-theme, acceptance with an agent who does not know the project. Note every
-unclear step of the guide in the friction table, write the results in
-`docs/hardware-validation.md` (`PC B 2026-10-xx: ...`), never a result that was
-not seen. Then T15.
+1. Study of the commercial station that Februus should replace (user, with
+   the written agreement of the tutor): its SSD, read-only on f1, service
+   `februus` stopped. Does it really analyze (expired licence?), why 10 s
+   per key, which checks. Results in a PRIVATE note, never in this public
+   repository (no reverse engineering, no decompilation).
+2. Then the test on the second mini PC: follow `docs/TEST-PC-B.fr.md` with
+   `docs/INSTALL.fr.md`; note every unclear step in the friction table, write
+   the results in `docs/hardware-validation.md` (`PC B 2026-10-xx: ...`),
+   never a result that was not seen. Then T15.
 
 ## Waiting for the user (go on with the rest meanwhile)
 
@@ -101,7 +104,9 @@ and merged.
   ClamAV is the cost of a real analysis (about 9 ms per small file, 18 MB/s;
   Februus adds 5 %): one file at a time, one CPU thread of four. Leads:
   several files at once to clamd (MaxThreads 12), a shorter settle. Mounting
-  not measured yet (no green key plugged on f1).
+  not measured yet (no green key plugged on f1). Android backup key (user):
+  about 4500 files, 30 GB, one hour (8.5 MB/s): to explain (USB speed,
+  ClamAV on photos and videos, files above 2 GB).
 - Lead (not decided): Cog (WebKit kiosk browser, Debian package) instead of
   Firefox: smaller, no UI, but no policy file and all kiosk checks to redo.
 - An update needs `watchdog_seconds = 10` in `[web]` of an existing

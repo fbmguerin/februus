@@ -258,6 +258,22 @@ Le script peut être relancé sans risque. Il garde la configuration
 exige un nouveau réglage, il s'arrête **sans rien casser** et affiche quoi
 corriger (comparez avec `config/februus.example.toml`).
 
+**Station installée avant le 7 octobre 2026 :** la nouvelle version demande
+trois réglages. Ajoutez-les, puis relancez le script :
+
+```
+F=/etc/februus/februus.toml
+sed -i '/^stream_seconds = /a watchdog_seconds = 10' $F
+sed -i '/^max_entries = /a max_file_mb = 2000' $F
+sed -i 's/^file_timeout_seconds = .*/file_timeout_seconds = 600/' $F
+sed -i '/^"scan.limit_exceeded" /a "file.too_big"            = "red"' $F
+februus config check
+./deploy/install.sh --kiosk
+```
+
+Avec le thème, ajoutez `--theme /usr/local/src/februus-theme-moselle` (après un
+`git pull` dans ce dossier).
+
 ## En cas de problème
 
 | Symptôme | Que faire |
@@ -304,10 +320,15 @@ station :
   la machine) ;
 - le journal des clés `/var/log/februus/keys.jsonl` (une ligne par clé) ;
 - les règles USB (USBGuard), udev, udisks2 et polkit ;
+- les réglages de ClamAV : les fichiers jusqu'à 2 Go sont vérifiés (plus gros :
+  rouge tout de suite), le contenu extrait des archives va dans
+  `/var/lib/februus-clamd` (autorisé par `/etc/apparmor.d/local/usr.sbin.clamd`) ;
 - pas de mise en veille : les cibles de veille sont masquées, et
   `consoleblank=0` (`/etc/default/grub.d/februus.cfg`) garde l'écran allumé ;
 - avec `--kiosk` : le service `februus-kiosk` et les règles de Firefox qui
-  n'autorisent que l'écran de la station.
+  n'autorisent que l'écran de la station ; le navigateur ne peut joindre que
+  cette machine (limite réseau sur son compte) ; une seule console de secours
+  (Ctrl+Alt+F2) ; les sons au maximum.
 
 Le détail du fonctionnement : `docs/HOW-IT-WORKS.fr.md`. Les décisions :
 `docs/decisions.md`.
