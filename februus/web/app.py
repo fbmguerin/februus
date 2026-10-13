@@ -40,6 +40,7 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse, Response, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.concurrency import run_in_threadpool
+from starlette.datastructures import MutableHeaders
 
 from februus.core.config import Config
 from februus.core.status import Status
@@ -56,6 +57,26 @@ SCREEN_SOUNDS = {
     ("result", "red"): ("red", True),
     ("removed", "red"): ("red", True),
 }
+
+
+class _NoStaleFiles:
+    """Adds ``Cache-Control: no-cache`` to every HTTP response, as pure ASGI
+    (does not touch the receive channel, so SSE disconnection still works)."""
+
+    def __init__(self, app: Any) -> None:
+        self.app = app
+
+    async def __call__(self, scope: Any, receive: Any, send: Any) -> None:
+        if scope["type"] != "http":
+            await self.app(scope, receive, send)
+            return
+
+        async def send_with_header(message: Any) -> None:
+            if message["type"] == "http.response.start":
+                MutableHeaders(scope=message).setdefault("cache-control", "no-cache")
+            await send(message)
+
+        await self.app(scope, receive, send_with_header)
 
 
 def create_app(
@@ -92,14 +113,14 @@ def create_app(
         )
         return Response(script, media_type="text/javascript")
 
-    @app.middleware("http")
-    async def no_stale_files(request: Request, call_next: Callable[[Request], Any]) -> Response:
-        # The kiosk browser must ask again for every file at each load (an
-        # answer "not modified" is cheap): else, after an update of the code
-        # or of the theme, it kept its old copy of the style sheets.
-        response = await call_next(request)
-        response.headers.setdefault("Cache-Control", "no-cache")
-        return response
+    # The kiosk browser must ask again for every file at each load (an answer
+    # "not modified" is cheap): else, after an update of the code or of the
+    # theme, it kept its old copy of the style sheets. A pure-ASGI middleware
+    # only adds the header; it does NOT wrap the receive channel, so the
+    # /events stream still sees request.is_disconnected() (BaseHTTPMiddleware
+    # would hide it, leaving an abandoned stream running until stream_seconds).
+    # FR : en-tête anti-cache sans casser la détection de déconnexion du flux.
+    app.add_middleware(_NoStaleFiles)
 
     app.mount("/static", StaticFiles(directory=WEB_DIR / "static"), name="static")
     if (theme_dir / "static").is_dir():

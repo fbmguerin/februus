@@ -274,7 +274,8 @@ if [ "$KIOSK" = yes ]; then
   # FR : la carte son démarre muette : tout au maximum, réglage conservé.
   if command -v amixer >/dev/null && [ -e /proc/asound/cards ] \
       && ! grep -q 'no soundcards' /proc/asound/cards; then
-    amixer scontrols | sed -n "s/^Simple mixer control '\([^']*\)',.*/\1/p" |
+    # Keep the index: some cards have indexed controls ('Headphone',1).
+    amixer scontrols | sed -n "s/^Simple mixer control '\([^']*\)',\([0-9]*\)/\1,\2/p" |
       while IFS= read -r control; do
         amixer -q sset "$control" 100% unmute 2>/dev/null || true
       done

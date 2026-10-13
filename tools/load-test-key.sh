@@ -4,7 +4,7 @@
 #
 #   tools/load-test-key.sh /dev/sdX <kit> [iso-file]   (as root, su -)
 #
-# Kits: clean, eicar, eicar-zip, encrypted, nested, big (900 MB), toobig
+# Kits: clean, eicar, eicar-zip, encrypted, nested, big (900 MB), toobig (2.5 GB)
 # (1.1 GB), ntfs, exfat, two-partitions, two-partitions-eicar, iso <file>.
 # After loading: unplug the key and plug it in again; the station analyzes it.
 # Safety: only a whole USB disk (removable, 64 GB at most), with nothing
@@ -61,7 +61,8 @@ fi
 
 # 2. Files of the kit.
 files="$work/files"
-case "$KIT" in big) BIGMB=900;; toobig) BIGMB=1100;; *) BIGMB=;; esac
+# toobig > scan.max_file_mb (2000): it must give "file.too_big" (red).
+case "$KIT" in big) BIGMB=900;; toobig) BIGMB=2500;; *) BIGMB=;; esac
 python3 "$HERE/make-test-files.py" "$files" ${BIGMB:+--big "$BIGMB"} >/dev/null
 ordinary="$work/ordinary"; mkdir -p "$ordinary/Documents/2026" "$ordinary/Photos" "$ordinary/Divers"
 for i in $(seq 1 25); do

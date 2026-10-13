@@ -289,6 +289,12 @@ def test_max_file_mb_matches_the_clamd_limit():
     assert f"\nMaxFileSize {max_file_mb}M\n" in clamd
 
 
+
+def test_watchdog_must_be_well_above_the_poll(data):
+    data["web"]["poll_interval_ms"] = 6000
+    data["web"]["watchdog_seconds"] = 10  # 10 s < 2 * 6 s
+    assert "web.watchdog_seconds: must be at least twice poll_interval_ms" in errors_of(data)
+
 def test_file_timeout_fits_in_the_clamd_scan_time():
     """clamd must not stop a file before Februus would (a clearer finding)."""
     root = Path(__file__).resolve().parents[2]
@@ -296,4 +302,5 @@ def test_file_timeout_fits_in_the_clamd_scan_time():
     with (root / "config" / "februus.example.toml").open("rb") as file:
         timeout = tomllib.load(file)["scan"]["file_timeout_seconds"]
     scan_time_ms = int(clamd.split("\nMaxScanTime ", 1)[1].split()[0])
-    assert scan_time_ms >= timeout * 1000
+    # Strictly greater: Februus must stop a slow file before clamd does.
+    assert scan_time_ms > timeout * 1000
