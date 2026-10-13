@@ -215,6 +215,7 @@ Left open (see `docs/STATUS.md`):
 | Keys: SanDisk 3.2Gen1 (2), Kingston DataTraveler 3.0 | 0781:5581, 0951:1666 | `08:06:50` | allow |
 | Laptop hard disk on a USB-IDE/SATA adapter (JMicron bridge) | 152d:2338 | `08:06:50` | allow |
 | Storage enclosure "Generic External" (Initio), no medium seen | 13fd:0840 | `08:06:50` | allow |
+| USB3 disk enclosure with UAS (JMicron), f1 2026-10-13 | 152d:0562 | `08:06:50` + `08:06:62` | allow since `match-all` (was blocked by `equals`) |
 
 Not seen at all by the PC (no USB event): the CD drive, and the disk
 behind the blocked dock.
