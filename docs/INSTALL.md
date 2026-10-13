@@ -141,22 +141,10 @@ installed with Firefox and `cage` (a tiny window manager).
 
 ```
 ./deploy/install.sh --kiosk
-reboot
 ```
 
-After the reboot, the screen "Insérez votre clé USB" ("Insert your USB key")
-must appear by itself. Before it, for up to about 30 seconds, you may see
-lines of text or a black screen: the kiosk waits for the graphics driver.
-
-If after one minute the screen still shows lines of text (for example
-`Found 0 GPUs` or `Unable to create the wlroots backend`), a login prompt, or
-stays black, the kiosk did not start: see [Get back control of a station in
-kiosk mode](#get-back-control-of-a-station-in-kiosk-mode) and look at
-`journalctl -u februus-kiosk -b`. The station itself (the analysis of keys)
-keeps working.
-
-To be even cleaner, then do the checks of sections 7 and 8 of
-`docs/hardware-validation.md` (write the results in the "Result" column).
+**Do not reboot yet.** If you want the theme below, install it now; the reboot
+is the last step ([Last step: reboot](#last-step-reboot)).
 
 ## Optional: a look of your own (theme)
 
@@ -206,7 +194,7 @@ cd /usr/local/src/februus
 (checked with a fixed SHA-512 fingerprint: a modified file is refused). Without
 it, the screens appear without the style. Then the screen shows the bloc-marque
 "Préfet de la Moselle" and the Marianne font. If you use the kiosk (step 6),
-reboot.
+reboot at the end ([Last step: reboot](#last-step-reboot)).
 
 Update the theme later:
 
@@ -225,6 +213,28 @@ outside the préfecture):
 rm -r /etc/februus/theme
 systemctl restart februus
 ```
+
+## Last step: reboot
+
+Once the kiosk (step 6) and, if wanted, the theme are installed:
+
+```
+reboot
+```
+
+After the reboot, the screen "Insérez votre clé USB" ("Insert your USB key")
+must appear by itself. Before it, for up to about 30 seconds, you may see
+lines of text or a black screen: the kiosk waits for the graphics driver.
+
+If after one minute the screen still shows lines of text (for example
+`Found 0 GPUs` or `Unable to create the wlroots backend`), a login prompt, or
+stays black, the kiosk did not start: see [Get back control of a station in
+kiosk mode](#get-back-control-of-a-station-in-kiosk-mode) and look at
+`journalctl -u februus-kiosk -b`. The station itself (the analysis of keys)
+keeps working.
+
+To be even cleaner, then do the checks of sections 7 and 8 of
+`docs/hardware-validation.md` (write the results in the "Result" column).
 
 ## Use by an agent
 
