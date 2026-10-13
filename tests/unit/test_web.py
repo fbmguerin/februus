@@ -283,7 +283,11 @@ def test_live_stream_sends_signs_of_life_between_changes(raw, status):
     # watchdog 3 s: a sign of life every second; the stream lasts 2 s.
     raw["web"]["watchdog_seconds"] = 3
     raw["web"]["stream_seconds"] = 2
-    names = [name for name, _ in stream_events(make_client(raw, status))]
+    # Fixed clock: the idle tip never rotates, so the screen is sent once
+    # (the alive frames keep using the real clock). Without this, a stream
+    # crossing a tip_change_seconds boundary gets a second "screen" event.
+    client = make_client(raw, status, now=lambda: FIXED_NOW)
+    names = [name for name, _ in stream_events(client)]
     assert names[0] == "screen"
     assert names.count("screen") == 1
     assert names.count("alive") >= 1
