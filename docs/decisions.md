@@ -746,3 +746,13 @@ to keep STATUS short.
   limit is 2000 MB on both sides (`max_file_mb = 2000`, `MaxFileSize
   2000M`); with 3000, a file of 2 to 3 GB would be read in full, then
   refused by clamd (red, but slow).
+- 2026-10-13 — USBGuard storage rule: `equals { 08:*:* }` → `match-all
+  { 08:*:* }`. `equals` required a device with EXACTLY ONE interface, so a
+  USB3 disk enclosure that offers UAS (two mass-storage interfaces,
+  08:06:50 + 08:06:62) was blocked, although PLAN.md says USB SSDs are in
+  scope (seen on f1 with a JMicron 152d:0562 enclosure). `match-all` allows
+  a device whose interfaces are ALL class 08, whatever their number (plain
+  key or UAS enclosure), and still blocks a "key" that also declares a
+  keyboard (HID 03) or a network interface. Hubs (class 09) stay blocked.
+  Test: `tests/unit/test_usbguard.py`. To apply on an existing station:
+  rerun `deploy/install.sh --usbguard` (keyboard/mouse only plugged).
