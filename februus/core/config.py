@@ -183,6 +183,15 @@ def parse_config(data: Mapping[str, Any], sources: tuple[Path, ...] = ()) -> Con
     poll_interval = web.get_int("poll_interval_ms", minimum=100)
     stream_seconds = web.get_int("stream_seconds", minimum=1)
     watchdog_seconds = web.get_int("watchdog_seconds", minimum=3)
+    # The server sends a sign of life about every watchdog_seconds/3, but only
+    # once per poll. If the poll is too slow, a healthy stream looks frozen and
+    # the screen falsely shows "out of service": keep the watchdog well above
+    # the poll. FR : le chien de garde doit rester bien au-dessus du sondage.
+    if (
+        watchdog_seconds is not None and poll_interval is not None
+        and watchdog_seconds * 1000 < 2 * poll_interval
+    ):
+        web.error("watchdog_seconds", "must be at least twice poll_interval_ms")
     tip_change = web.get_int("tip_change_seconds", minimum=1)
     sounds = web.get_bool("sounds")
     web.finish()

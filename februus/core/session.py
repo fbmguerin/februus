@@ -22,6 +22,7 @@ import traceback
 from collections.abc import Callable, Sequence
 from contextlib import ExitStack
 from dataclasses import dataclass
+from itertools import islice
 from pathlib import Path, PurePath
 
 from februus.analyzers import build_analyzers
@@ -174,10 +175,11 @@ def _end(
         bytes_done=run.bytes_done,
         eta_seconds=0,
         problems=tuple(sorted({row.code for row in problems})),
-        big_files=tuple(
-            _printable(row.path) for row in problems
-            if row.code in BIG_FILE_CODES and row.path
-        )[:5],
+        big_files=tuple(islice(
+            (_printable(row.path) for row in problems
+             if row.code in BIG_FILE_CODES and row.path),
+            5,
+        )),
     )
     entry = {
         "started": started,
