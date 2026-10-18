@@ -146,23 +146,11 @@ installé avec Firefox et `cage` (un mini-gestionnaire de fenêtres).
 
 ```
 ./deploy/install.sh --kiosk
-reboot
 ```
 
-Au redémarrage, l'écran « Insérez votre clé USB » doit apparaître tout seul.
-Avant, pendant 30 secondes au plus, vous pouvez voir des lignes de texte ou un
-écran noir : le kiosque attend le pilote graphique.
-
-Si, au bout d'une minute, l'écran montre encore des lignes de texte (par
-exemple `Found 0 GPUs` ou `Unable to create the wlroots backend`), une invite
-de connexion, ou reste noir, le kiosque n'a pas démarré : voir [Reprendre la
-main sur une station en kiosque](#reprendre-la-main-sur-une-station-en-kiosque)
-et regarder `journalctl -u februus-kiosk -b`. La station elle-même (l'analyse
-des clés) continue de marcher.
-
-Pour rendre le tout encore plus propre, faites ensuite les contrôles des
-sections 7 et 8 de `docs/hardware-validation.md` (écrivez les résultats dans la
-colonne « Result »).
+**Ne redémarrez pas tout de suite.** Si vous voulez le thème ci-dessous,
+installez-le maintenant ; le redémarrage est la dernière étape ([Dernière
+étape : redémarrer](#dernière-étape--redémarrer)).
 
 ## Facultatif : l'apparence de votre site (thème)
 
@@ -214,7 +202,7 @@ cd /usr/local/src/februus
 officiel (vérifié avec une empreinte SHA-512 fixe : un fichier modifié est
 refusé). Sans lui, les écrans s'affichent sans le style. L'écran montre ensuite
 le bloc-marque « Préfet de la Moselle » et la police Marianne. Si vous utilisez
-le kiosque (étape 6), redémarrez.
+le kiosque (étape 6), redémarrez à la fin ([Dernière étape : redémarrer](#dernière-étape--redémarrer)).
 
 Mettre à jour le thème plus tard :
 
@@ -233,6 +221,29 @@ hors de la préfecture) :
 rm -r /etc/februus/theme
 systemctl restart februus
 ```
+
+## Dernière étape : redémarrer
+
+Quand le kiosque (étape 6) et, si vous le voulez, le thème sont installés :
+
+```
+reboot
+```
+
+Au redémarrage, l'écran « Insérez votre clé USB » doit apparaître tout seul.
+Avant, pendant 30 secondes au plus, vous pouvez voir des lignes de texte ou un
+écran noir : le kiosque attend le pilote graphique.
+
+Si, au bout d'une minute, l'écran montre encore des lignes de texte (par
+exemple `Found 0 GPUs` ou `Unable to create the wlroots backend`), une invite
+de connexion, ou reste noir, le kiosque n'a pas démarré : voir [Reprendre la
+main sur une station en kiosque](#reprendre-la-main-sur-une-station-en-kiosque)
+et regarder `journalctl -u februus-kiosk -b`. La station elle-même (l'analyse
+des clés) continue de marcher.
+
+Pour rendre le tout encore plus propre, faites ensuite les contrôles des
+sections 7 et 8 de `docs/hardware-validation.md` (écrivez les résultats dans la
+colonne « Result »).
 
 ## Utilisation par un agent
 
